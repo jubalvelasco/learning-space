@@ -3,11 +3,11 @@
 > [!NOTE]  
 > The rust book says that Traits are like Interfaces (but not completely), I would say they are more like Abstract Classes + Concepts of C++.
 >
-> We can declare only the signature of the methods inside a trait and defer the implementation definition to the types that implements it.
+> We can declare only the signature of the methods inside a trait and defer the implementation definition to the types that implement it.
 >
-> But it is also possible to provide a default implementation definition of the methods inside the trait right away, and can be overriden in the types that implement it if needed.
+> But it is also possible to provide a default implementation definition of the methods inside the trait right away, which can be overridden in the types that implement it if needed.
 
-A **trait** defines functionality, a particular type has and can share with other types.
+A **trait** defines functionality a particular type has and can share with other types.
 
 - We can use traits to define shared behavior in an abstract way.
 - We can use **trait bounds** to **specify** that a **generic type** can be **any type** that **has certain behavior**.
@@ -31,7 +31,7 @@ pub trait Summary {
 After **`impl`**, we put the **trait name** we want to implement, then use the **`for`** keyword, and then the **name of the type**.
 
 > [!IMPORTANT]  
-> When using types that implements a certain trait, the user must also **bring the trait into scope**.
+> To call the trait's methods on a type that implements a certain trait, the user must also **bring the trait into scope** (e.g. `use aggregator::Summary;`).
 
 ```rust
 pub struct NewsArticle {
@@ -61,11 +61,15 @@ impl Summary for Tweet {
 }
 ```
 
-# TODO: know more about this coherence? and orphan rule?
+# Coherence and the Orphan Rule
+
+We can implement a trait on a type **only if either the trait or the type (or both) is local to our crate**. For example, we can implement `Display` (external) on our own `Tweet` type, or our own `Summary` trait on `Vec<T>` (external), but we **can't** implement the external `Display` trait on the external `Vec<T>` type.
+
+This restriction is part of a property called **coherence**, and more specifically the **orphan rule**. It ensures other people's code can't break your code and vice versa; without it, two crates could implement the same trait for the same type, and Rust wouldn't know which implementation to use.
 
 # Default Implementations
 
-**Unlike interfaces** in **Java**, we can **define** a **default method definition** for a trait in **Rust** which is also overridable in it's implementor, this is more similar to the **virtual methods** inside an **abstract class** in **C++**, .
+Like `default` methods in **Java** interfaces (Java 8+), we can **define** a **default method definition** for a trait in **Rust** which is also overridable in its implementor, this is also similar to the (non-pure) **virtual methods** inside an **abstract class** in **C++**.
 
 ```rust
 pub trait Summary {
@@ -86,7 +90,7 @@ impl Summary for NewsArticle {
 
 This would make the **parameter only accept** the **type** that **implements** the specified **trait**.
 
-_This indeed looks like C++ concepts - Obliviuous Me_
+_This indeed looks like C++ concepts - Oblivious Me_
 
 ```rust
 pub fn notify(item: &impl Summary) {
@@ -242,7 +246,7 @@ impl<T: Display + PartialOrd> Pair<T> {
 
 We can also conditionally [implement a trait](#implementing-a-trait-on-a-type) for any type that implements another trait.
 
-For example, the standard library implements the `ToString` trait on all type `T` that implements the `Display` trait automatically.
+For example, the standard library automatically implements the `ToString` trait on every type `T` that implements the `Display` trait.
 
 ```rust
 impl<T: Display> ToString for T {

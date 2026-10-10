@@ -1,7 +1,7 @@
 # Fastify Plugins
 
 In fastify everything is a plugin, a route can be a plugin, an object can
-be a plugin, a handler can be a plugin and etc. Almost everything can ba a
+be a plugin, a handler can be a plugin and etc. Almost everything can be a
 plugin in fastify.
 
 ## Fastify Context/Scope
@@ -30,8 +30,9 @@ its parameter.
 
   - **`fastify instance`** is the first parameter passed in the example functions above.
   - **`fastify context/scope`** is the function body ```{}``` itself.
-  - **`fastify plugin`** are anything that will be added inside the **`fastify
-  context/scope`**, mostly through `fastify.decorate()`, `fastify.decorateRequest()`, and `fastify.decorateReply()` *(but not limited to)*.
+  - **`fastify plugin`** is the function itself (`function(fastify, options, done)`) that gets registered with `fastify.register()`; inside it you add things to the **`fastify context/scope`**, mostly through routes, hooks, `fastify.decorate()`, `fastify.decorateRequest()`, and `fastify.decorateReply()` *(but not limited to)*.
+
+  > NOTE: everything added inside a registered plugin is **encapsulated**: it is only visible to that plugin and its children, not to the parent/sibling scopes. If you want decorators/hooks to be visible to the parent scope, wrap the plugin function with the `fastify-plugin` package.
 
 ## Register
 
@@ -41,6 +42,7 @@ context or scope.
 ```js
 fastify.register(function(fastify, options, done) {
   // plugins
+  done(); // the callback form must call done(), otherwise fastify waits for it and the server fails to start (plugin timeout)
 });
 
 // or
@@ -66,9 +68,9 @@ fastify.register(require('./your-plugin'), { options });
 
 - **Async style note**
 
-  We can call the ```return``` keyword after all the plugins is declared or if
-  you have some crazy logic in your plugin context/scope, if not the
-  ```return``` keyword can sometimes be ommited.
+  In the async form we don't use the `done` callback (don't mix the two styles), the plugin
+  is considered loaded when the returned promise resolves, so the ```return``` keyword
+  can be omitted.
 
   ```js
   async function(fastify, options) {
@@ -78,8 +80,8 @@ fastify.register(require('./your-plugin'), { options });
 
 - **The `options` parameter**
 
-  If you have been wondering why does the functions passed into the
-  `register` method has a second argument called `options`?
+  If you have been wondering why the functions passed into the
+  `register` method have a second argument called `options`?
 
   ```js
   function(fastify, options, done);
@@ -111,7 +113,7 @@ fastify.register(require('./your-plugin'), { options });
   ```
   Options { name: 'micha' }
   ```
-  You might now realize that this options parameter can be use to set some
+  You might now realize that this options parameter can be used to set some
   logics inside the plugins scope.
 
 ## Decorators
@@ -172,7 +174,7 @@ fastify.register(require('./your-plugin'), { options });
   the **`function`** keyword, not by an **`arrow function expression`**.
   
   This is needed so that the **`request`** and **`reply`** object
-  can accessed using the **`this`** keyword.
+  can be accessed using the **`this`** keyword (arrow functions don't have their own `this`).
   
   > *Warning*
   
@@ -201,8 +203,9 @@ fastify.register(require('./your-plugin'), { options });
   }
   ```
   
-  Instead of defining the value of the property in `request` object,
-  we just declare it's value then set it's value using
+  Instead of defining the value of the property in the `request` object,
+  we just declare the property (with `null`, so fastify knows the object's shape up front),
+  then set a fresh value for each request using
   `addHook('onRequest', async function(req, rep) {});`
   
   

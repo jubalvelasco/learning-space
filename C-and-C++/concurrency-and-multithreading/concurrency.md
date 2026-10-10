@@ -1,20 +1,20 @@
 # **Concurrency**
 
-- **Concurrency** - two things running together (maybe switching back and forth)
-- **Parallelism** - doing two things in parallel.
+- **Concurrency** - two or more tasks making progress during overlapping time periods (they may be interleaved on a single core, switching back and forth)
+- **Parallelism** - two or more tasks literally executing at the same time (requires multiple cores/processors).
 
 
 ## **C++11 - memory model**
 
 - Now a program consists of one or more _**threads of execution**_.
-- Every write to a single memory location must _**synchronize-with**_ all other reads and or writes of that memory location, or else the program has undefined behavior.
+- Every write to a single memory location must be ordered (via a _**happens-before**_ relationship, built from _**synchronizes-with**_ relationships) with respect to all other reads and/or writes of that memory location from other threads, or else the program has a data race, which is undefined behavior (unless all those accesses are atomic).
 - _**Synchronizes-with**_ relationships can be established by using various standard library facilities, such as `std::mutex` and `std::atomic<T>`.
 
 
 ## **C++11 - starting a new thread**
 
 ```c++
-#include <thread>`
+#include <thread>
 ```
 
 In C++11, the standard library "owns" the notion of creating new threads.
@@ -28,11 +28,13 @@ std::thread threadB = std::thread([](){
 
 ## **Joining the finished threads**
 
-The new thread starts executing immediately. When its job is done,
-the thread has nothing else to do: it becomes _**joinable**_.
+The new thread starts executing immediately. A `std::thread` object that
+was constructed with a function is _**joinable**_ from the start (whether
+its job is already finished or not), until `.join()` or `.detach()` is called.
 
-Call `.join()` on `std::thread` object before destroying it.
-This call will _**block**_, if necessary, until the other thread's job
+Call `.join()` (or `.detach()`) on a `std::thread` object before destroying it,
+destroying a still-joinable `std::thread` calls `std::terminate()`.
+The `.join()` call will _**block**_, if necessary, until the other thread's job
 is finished.
 
 ```c++
@@ -87,7 +89,7 @@ threadB.join();
 ```
 
 This is a **physical data race** because both the threads
-might read/write the `counter`simultaneously, this is an
+might read/write the `counter` simultaneously, this is
 undefined behavior.
 
 ## **Fixing the physical data race via atomic**
@@ -106,8 +108,8 @@ This is because `std::atomic` synchronizes with every other access to it.
 `std::atomic<int> counter = 0` will only fix the **physical data race**,
 in some programs (not all) the previous code might still be considered
 as a bug since it still contains other types of data race like:
-**semantic data race** and **logical data race**, but this data races
-are not considered as **undefined behavior**.
+**semantic data race** and **logical data race** (race conditions in the program's logic), but these data races
+are not considered **undefined behavior**.
 
 ## **Fixing the physical data race via mutex**
 
@@ -139,21 +141,24 @@ threadB.join();
 
 ## **Lock Guards**
 
-_**Mutex'es**_ can produce **"deadlocks"** if we forgot to
-call `.unlock()`, and/or if the mutex goes
-out of scope before calling unlock, this can
-happen in if-else block or try-catch blocks, a way to fix
+_**Mutex'es**_ can produce **"deadlocks"** if we forget to
+call `.unlock()` (e.g. an early `return`, or an exception thrown between `lock()` and `unlock()`),
+since every other thread that tries to lock it will wait forever (also, destroying a mutex that is
+still locked is undefined behavior). A way to fix
 this problem is to use a **lock guard** that will unlock
 a mutex automatically when that lock guard goes out of
-scope, declare the lock guard in a scope where this specific problem can occur. eg:
+scope (RAII), declare the lock guard in the scope that needs the lock. eg:
 
 ```c++
 std::lock_guard<std::mutex> lock_g(mtx);
 ```
 
-In C++17 `std::scoped_lock` is introduced, they are the same
-as `std::lock_guard` and the only difference is they can
-take multiple mutex'es.
+In C++17 `std::scoped_lock` is introduced, it is the same
+as `std::lock_guard` except that it can
+take multiple mutex'es, and locks them all using a deadlock-avoidance algorithm (like `std::lock`).
+
+Another classic cause of deadlock is two threads locking two mutexes in opposite orders
+(thread 1 locks A then B, thread 2 locks B then A); always lock in the same order or use `std::scoped_lock`.
 
 _**Mutex'es**_ can also produce **"starvation"** where
 the other threads cannot acquire resource or is
@@ -161,6 +166,6 @@ waiting for a very, very long time. A possible cause
 of this case is when one thread that locks a mutex takes
 an eternity before unlocking it back.
 
-The `std::unique_lock` which is a bit more powerful than
-`std::lock_guard` and `scope_guard` in that we can control
-locking and unlocking, and is also used in `std::condition_variable`, It also follows the same RAII.
+The `std::unique_lock` is a bit more powerful than
+`std::lock_guard` and `std::scoped_lock` in that we can manually control
+locking and unlocking (and it is movable), and it is also required by `std::condition_variable`. It also follows the same RAII.

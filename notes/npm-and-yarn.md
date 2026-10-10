@@ -11,7 +11,10 @@ sudo npm install -g n
 sudo n stable
 ```
 
-### **Enable corepack (for yarn only | one time, first use)**
+### **Enable corepack (for yarn/pnpm | one time, first use)**
+
+(Corepack is bundled with Node.js 16.9+ up to Node.js 24; newer Node.js versions no longer bundle it, so install it first with `npm install -g corepack`)
+
 ```shell
 corepack enable
 ```
@@ -28,22 +31,22 @@ yarn init -2
 yarn set version stable
 ```
 
-### Clean Install (mostly use for CI)
+### Clean Install (mostly used for CI)
 ```
 npm ci
 ```
 
-### Install with development
+### Install with development dependencies
 ```
 npm install
 yarn install
 ```
 
-### Install with production
+### Install production dependencies only
 ```
-npm install --production
-// or
 npm install --omit=dev
+# older (deprecated) form:
+npm install --production
 ```
 
 ### Show outdated local packages (npm, yarn 1)
@@ -85,7 +88,7 @@ npm update
 ```
 sudo npm update -g
 ```
-ommit `sudo` if node and npm is not installed in a write protected directory.
+omit `sudo` if node and npm are not installed in a write protected directory.
     
 ### Update globally installed packages (major)
 ```
@@ -94,12 +97,12 @@ sudo npm update -g
 sudo npm install -g <new version showed in outdated | ex: npm@8.15.0>
 ```
     
-### Run locally install npm CLI tool/program
+### Run locally installed npm CLI tool/program
 ```
 npx <tool/program>
 ```
 
-### Run globally install npm CLI tool/program
+### Run globally installed npm CLI tool/program
 ```
 <tool/program>
 ```
@@ -124,13 +127,18 @@ This example is helpful for slow internet connections.
 
 ### **Upgrading npm and yarn to latest stable version**
 
-Download the latest stable release
+Upgrade npm itself
+```
+npm install -g npm@latest
+```
+
+Download the latest stable yarn release (yarn 1 command)
 ```cmd
 yarn policies set-version
 ```
 
-The command above might suggest to run the command below after
-it was finished, and if it did run this:
+The command above might suggest running the command below after
+it has finished, and if it did, run this:
 ```
 yarn set version stable
 ```

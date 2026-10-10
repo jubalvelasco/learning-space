@@ -8,16 +8,17 @@ or a page in a web-app/web-site. Android activity is the
 subclass of `ContextThemeWrapper` class.
 
 - **Main Activity** - The "main" activity is the activity
-that loads first and the rest of your application.
+that is launched first (the entry point declared with the
+`MAIN`/`LAUNCHER` intent filter), and from it the rest of your application is opened.
 Every application can have multiple activities, therefore
 you can list other activities to load and use later on but
-you can only have one "main" activity.
+there is usually only one "main" activity.
 
 - **Layout Editor** - Interactive Editor where we can create
 our activity layout and design.
     - **Design** - This mode shows the default/current state
     of the **Layout** and **Views** components.
-    - **Blueprint** - This shows every **Layout** and **Views** components, even if some of them has is in hidden/invisible
+    - **Blueprint** - This shows every **Layout** and **Views** components (as outlines), even if some of them are in a hidden/invisible
     state.
 
 - **Layout** - A box where we can put our **View** components
@@ -29,7 +30,7 @@ of layout each having their own different way to arrange the
 eg. Buttons, Text and etc.
 
 - **Attributes** - Attributes or Properties are what describe a
-**View** or a **Layout** (kinad like **.JSON**). A **View** or
+**View** or a **Layout** (kind of like key-value pairs in **.JSON**). A **View** or
 **Layout** has attributes inside them, in code both the **View**
 and **Layout** can be described using the **.xml** markup language
 (a language slightly similar to HTML).
@@ -40,15 +41,15 @@ data between activities.
 <br><br>
 
 ## **About Project Structure**
-- **.java** - files with this extension defines the functionality.
-- **.xml** - files with this extension defines the **Layout, View**
+- **.java** (or **.kt** for Kotlin) - files with this extension define the functionality.
+- **.xml** - files with this extension define the **Layout, View**
 and even acts like a **configuration** file like the **AndroidManifest.xml**.
 
 <br><br>
 
 ## **ID Attribute**
 
-Use to reference **Views** in **.java** code.
+Used to reference **Views** in **.java** code.
 
 - **XML Syntax:**
 
@@ -74,16 +75,17 @@ Use to reference **Views** in **.java** code.
     ViewClassType obj = findViewById(R.id.ID_NAME);
     ```
 
-- **Getting a View objects own ID**
+- **Getting a View object's own ID**
 
     ```java
-    View.getId();
+    view.getId(); // called on a View instance
     ```
 
 - **Getting user input from input field**
 
     ```java
-    TextView txtInput = findViewById(R.id.TXT_INPUT_ID);
+    // input fields are `EditText` views (EditText is a subclass of TextView)
+    EditText txtInput = findViewById(R.id.TXT_INPUT_ID);
     String input = txtInput.getText().toString();
     ```
 
@@ -131,7 +133,7 @@ Use to reference **Views** in **.java** code.
 
 ## **Enabling Auto Import**
 
-**File > Settings > Editor > General > Auto Import > All/Allways**
+**File > Settings > Editor > General > Auto Import > All/Always**
 
 <br>
 
@@ -140,7 +142,7 @@ Use to reference **Views** in **.java** code.
 Import the logging class
 
 ```java
-import android.util.Log
+import android.util.Log;
 ```
 
 To log a message use the method below, the **Tag**
@@ -159,9 +161,9 @@ Log.d("Tag", "Message");
 import android.widget.Toast;
 ```
 
-Alerts are like pop up messages in the system itself,
-they are the small ones that appears most of the time at the
-bottom of the activity when something happens.
+Alerts (called **Toasts**) are like pop up messages in the system itself,
+they are the small ones that appear most of the time at the
+bottom of the screen for a short time when something happens.
 
 ```java
 Toast.makeText(this, "Alert Message", Toast.LENGTH_LONG).show();
@@ -175,7 +177,7 @@ In android studio, an important use of casting to different types
 is when we are casting the `View` class to its specific **view type**.
 
 We do this in order to access the methods of those specific **view types** that
-is not available in the base `View` class.
+are not available in the base `View` class.
 
 An example of a button event handler:
 
@@ -213,8 +215,8 @@ To add a string resource go to:
 
 **Projects Panel > app > res > values > strings.xml**
 
-then add you can add a typical string resource item inside the
-`<resource>` tag:
+then you can add a typical string resource item inside the
+`<resources>` tag:
 
 ```xml
 <string name="resource_name">the string</string>
@@ -224,9 +226,9 @@ then add you can add a typical string resource item inside the
 
 To use the string resource that you created, In the **Layout Editor**
 go to the **Attributes** panel, choose an attribute where you want
-the value to be the string resource that you created, then thin
+the value to be the string resource that you created, then click the thin
 vertical box beside it, then choose the string resource name you
-want to use.
+want to use. (In XML it is referenced as `@string/resource_name`, and in Java as `getString(R.string.resource_name)`.)
 
 <br><br>
 
@@ -248,7 +250,7 @@ to include the newly created **.xml** and **.java** files.
 
 **app > manifest > AndroidManifest.xml**
 
-Move the `<indent-filter></indent-filter>` tag inside the
+Move the `<intent-filter></intent-filter>` tag (the one containing the `android.intent.action.MAIN` action and `android.intent.category.LAUNCHER` category) inside the
 `<activity></activity>` tag of the new activity that you want to
 make as the new main activity.
 
@@ -260,7 +262,7 @@ You can also change the **icon image** and other things here.
 
 **app > manifest > AndroidManifest.xml**
  
-In the attribute of `<activity>` tag add just add a `android:label="NEW_TITLE"` attribute.
+In the `<activity>` tag just add an `android:label="NEW_TITLE"` attribute.
 
 ```xml
 <activity
@@ -314,7 +316,7 @@ startActivity(intent);
 
         Intent i = getIntent();
 
-        // here we assume that the data being pass is a string.
+        // here we assume that the data being passed is a string.
         // but remember that this is not always the case.
         String msg = i.getStringExtra("KEY");
     }
@@ -343,7 +345,7 @@ then add this attribute:
 ```
 
 Here the **JavaFileActivity.java** will become the parent activity
-of the child activity, an go back arrow will appear in the child
+of the child activity, a go back (up) arrow will appear in the child
 activity prompting to return to the **JavaFileActivity**.
 
 <br><br>
@@ -378,8 +380,8 @@ or
 
     ```java
     @Override
-    protected void onStart(Bundle savedInstanceState) {
-        super.onStart(savedInstanceState);
+    protected void onStart() { // onStart() takes no parameters
+        super.onStart();
     }
     ```
 
@@ -390,6 +392,7 @@ or
     protected void onResume() {
         super.onResume();
     }
+    ```
 
 4. `onPause()`
 
@@ -398,6 +401,7 @@ or
     protected void onPause() {
         super.onPause();
     }
+    ```
 
 5. `onStop()`
 
@@ -406,6 +410,7 @@ or
     protected void onStop() {
         super.onStop();
     }
+    ```
 
 6.  `onDestroy()`
 
@@ -414,6 +419,7 @@ or
     protected void onDestroy() {
         super.onDestroy();
     }
+    ```
 
 7. `onRestart()`
 
@@ -422,6 +428,7 @@ or
     protected void onRestart() {
         super.onRestart();
     }
+    ```
 
 [![Activity Life Cycle](./activity_lifecycle.png)](https://developer.android.com/guide/components/activities/activity-lifecycle#alc)
 
@@ -443,15 +450,17 @@ or
 
     `> onPause() > onStop() > onDestroy()`
 
+    (NOTE: since Android 12, pressing BACK on the app's root launcher activity no longer destroys it, it just moves the app to the background: `> onPause() > onStop()`)
+
 - When we **OPEN ANOTHER ACTIVITY** that **completely hides** the old activity
 
     `> onPause() > onStop()`
 
 - When we **GO BACK** to the old activity that was **completely hidden**.
 
-    `> onStart() > onResume()`
+    `> onRestart() > onStart() > onResume()`
 
-- When we **OPEN ANOTHER ACTIVITY** but the old activity is still visible (new activity has a **transparent layout**)
+- When we **OPEN ANOTHER ACTIVITY** but the old activity is still partially visible (new activity has a **transparent layout** or is dialog-themed)
 
     `> onPause()`
 

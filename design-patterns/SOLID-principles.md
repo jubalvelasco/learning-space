@@ -1,6 +1,6 @@
 # The SOLID principles
 
-The SOLID principles are a set of five design principles for writing maintainable and scalable software in object-oriented programming. They were introduced by Robert C. Martin and are considered a fundamental set of guidelines for designing software systems that are easy to understand, extend, and maintain. The SOLID acronym stands for the following principles:
+The SOLID principles are a set of five design principles for writing maintainable and scalable software in object-oriented programming. They were introduced by Robert C. Martin ("Uncle Bob"), while the SOLID acronym itself was coined later by Michael Feathers, and they are considered a fundamental set of guidelines for designing software systems that are easy to understand, extend, and maintain. The SOLID acronym stands for the following principles:
 
 1. **Single Responsibility Principle (SRP)**:
    - A class should have only one reason to change.
@@ -8,10 +8,10 @@ The SOLID principles are a set of five design principles for writing maintainabl
 
 2. **Open/Closed Principle (OCP)**:
    - Software entities (classes, modules, functions) should be open for extension but closed for modification.
-   - In other words, you should be able to add new functionality to a module without altering its existing code. This is often achieved through the use of interfaces, abstract classes, and inheritance.
+   - In other words, you should be able to add new functionality to a module without altering its existing code. This is often achieved through the use of interfaces, abstract classes, inheritance, and composition (e.g. the Strategy pattern).
 
 3. **Liskov Substitution Principle (LSP)**:
-   - Subtypes must be substitutable for their base types without altering the correctness of the program.
+   - Subtypes must be substitutable for their base types without altering the correctness of the program (named after Barbara Liskov).
    - This principle ensures that objects of derived classes can be used interchangeably with objects of their base classes without causing unexpected behavior.
 
 4. **Interface Segregation Principle (ISP)**:

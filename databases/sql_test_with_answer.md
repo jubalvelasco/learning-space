@@ -6,7 +6,7 @@ This file contains the same questions as the practice file, with model-correct a
 
 1. **Database creation:** In one sentence, explain the difference between creating a database on MySQL/MariaDB and creating/opening a database in SQLite.
 
-**Answer:** On MySQL/MariaDB `CREATE DATABASE` makes a named namespace on the server containing schemas and tables; in SQLite a "database" is a file on disk, so creating/opening it is creating/opening a file rather than issuing a server-side `CREATE` statement.
+**Answer:** On MySQL/MariaDB `CREATE DATABASE` makes a named namespace on the server containing tables (in MySQL/MariaDB "database" and "schema" mean the same thing); in SQLite a "database" is a file on disk, so creating/opening it is creating/opening a file rather than issuing a server-side `CREATE` statement.
 
 2. **Charset recommendation:** Fill in the blank (one keyword): The recommended character set for full Unicode support in MySQL/MariaDB is `utf8mb4`.
 
@@ -44,7 +44,7 @@ USE app_db;
 
 8. **Cross-database queries:** In a sentence, explain how to reference a table in another database/schema on server engines.
 
-**Answer:** Use fully-qualified names like `db_name.schema_name.table_name` (or `db_name.table_name` depending on the engine) to reference tables in other databases/schemas.
+**Answer:** Use fully-qualified names: `db_name.table_name` in MySQL/MariaDB (where database = schema), or `db_name.schema_name.table_name` in engines like SQL Server.
 
 9. **Drop database caution:** Give two concise safety steps you should perform before running `DROP DATABASE` on a production server.
 
@@ -67,7 +67,7 @@ CREATE TABLE items (
 
 12. **Autoincrement differences:** In one sentence, contrast `AUTO_INCREMENT` behavior in MySQL with the `AUTOINCREMENT` keyword in SQLite.
 
-**Answer:** MySQL's `AUTO_INCREMENT` uses a per-table counter and may reuse values after deletes; SQLite's `AUTOINCREMENT` forces a monotonically increasing counter that never reuses old `rowid`s but can increase file size and is rarely necessary.
+**Answer:** MySQL's `AUTO_INCREMENT` uses a per-table counter (before MySQL 8.0 the InnoDB counter was recalculated as `MAX(id)+1` on server restart, so ids of deleted rows at the end could be reused); SQLite's `AUTOINCREMENT` forces a monotonically increasing counter that never reuses old `rowid`s but can increase file size and is rarely necessary.
 
 13. **Adding a column:** Provide the one-line `ALTER TABLE` command to add a `created_at` DATETIME column defaulting to the current timestamp to the `items` table.
 
@@ -228,7 +228,7 @@ COMMIT;
 
 40. **WAL in SQLite:** In one sentence, explain why turning on `PRAGMA journal_mode = WAL;` can improve concurrency in SQLite and one caveat to be aware of.
 
-**Answer:** WAL mode allows many concurrent readers while a writer appends to the WAL, reducing writer-reader contention and improving concurrency; caveat: WAL increases disk usage and requires checkpointing and careful management of autockpoints.
+**Answer:** WAL mode allows many concurrent readers while a writer appends to the WAL, reducing writer-reader contention and improving concurrency; caveat: WAL increases disk usage and requires checkpointing and careful management of auto-checkpoints.
 
 41. **When to index:** In two short sentences, explain when you should add an index and one case where you should avoid indexing.
 
@@ -268,7 +268,7 @@ EXPLAIN QUERY PLAN SELECT * FROM users WHERE email = 'a@example.com';
 
 46. **SQLite VACUUM:** One sentence: what does `VACUUM;` do in SQLite and what is a maintenance consideration when running it?
 
-**Answer:** `VACUUM` rebuilds the SQLite database file to reclaim space and defragment it; it can be slow and requires as much free disk space as the DB size, so run during maintenance windows.
+**Answer:** `VACUUM` rebuilds the SQLite database file to reclaim space and defragment it; it can be slow and may need up to twice the DB size of free disk space (it builds a temporary copy), so run during maintenance windows.
 
 47. **Show schema:** Provide the one-line MySQL command to show table creation SQL for `users`, and the SQLite query to get the `sql` from `sqlite_master` for `users`.
 

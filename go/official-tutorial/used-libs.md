@@ -2,7 +2,7 @@
 
 ## Format `fmt` module
 
-Use to print different types in go
+Used to format and print different types in go
 
 ```go
 import "fmt"

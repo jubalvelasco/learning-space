@@ -39,9 +39,10 @@
 
 - **mobile development (React Native)**
     ```
-    npm install -g expo-cli
-    expo init YourApp
-    expo start
+    # the old global `expo-cli` (expo init) is deprecated, use:
+    npx create-expo-app YourApp
+    cd YourApp
+    npx expo start
     ```
 
 - **Web Applications (ReactJS)**
@@ -50,6 +51,8 @@
     or
     yarn create react-app app-name
     ```
+
+    NOTE: Create React App is deprecated (since Feb 2025) and no longer maintained. For new projects use a framework (e.g. Next.js, React Router) or a build tool like Vite: `npm create vite@latest app-name -- --template react`
 
 ## **The Root Div**
 
@@ -68,14 +71,14 @@ root.render(<OurMainComponent />)
 
 We should also keep in mind that it is also possible to
 create multiple react `root`s, this is common for old web
-apps that was not developed using react at the first place
+apps that were not developed using react in the first place
 but at some point they started to integrate react on some
 parts of their existing web app.
 
 ```jsx
-const root1 = ReactDOM.createRoot(document.getElementById('root1')
-const root2 = ReactDOM.createRoot(document.getElementById('root2')
-const root3 = ReactDOM.createRoot(document.getElementById('root3')
+const root1 = ReactDOM.createRoot(document.getElementById('root1'))
+const root2 = ReactDOM.createRoot(document.getElementById('root2'))
+const root3 = ReactDOM.createRoot(document.getElementById('root3'))
 
 root1.render(<MainComponentA />)
 root2.render(<MainComponentB />)
@@ -148,7 +151,7 @@ function Clock (props) {
 }
 ```
 
-When creating a simple component, `function` components tends to be
+When creating a simple component, `function` components tend to be
 easier to create and use than a `class` component.
 
 In `class` components we need to use the
@@ -161,10 +164,10 @@ On the other hand, when using functions, we can use the `props`
 argument directly not `this.` keyword needed, there is no `render()`
 method property, and `extends React.Component` is not needed.
 
-Though when simulating the `componentDidMount`, `componentDidUpdate`,
-and `componentWillUnmount` of **class components** for **function
-components** we need to use **Hook methods** like `useState` and 
-`useEffect`.
+Though for **function components**, we need to use **Hooks**: `useState`
+to hold state (instead of `this.state`), and `useEffect` to simulate the
+`componentDidMount`, `componentDidUpdate`, and `componentWillUnmount`
+lifecycle methods of **class components**.
 
 ## **Using a Component**
 
@@ -184,7 +187,7 @@ function ParentComponent (props) {
 
 Say for example we have a parent component and a child component,
 if we want to render the child component inside our parent component
-we just need to call the child component inside angles brackets `< />`.
+we just need to write the child component's name inside angle brackets `< />` (component names must start with a capital letter).
 
 
 ## **Passing Data To A Child Component**
@@ -241,14 +244,14 @@ function ChildComponent (props) {
 ```
 
 In **`class`** components, it is **optional** to create a constructor
-that will catch the **`props`** argument, because a **`this.prop`**
-is already created for us.
+that will catch the **`props`** argument, because **`this.props`**
+is already set up for us.
 
 ## **Manipulating States in a Component**
 
 React component can be **stateful** or **stateless**, stateful
-components are components that contains their own data, while
-stateless components only relies on to the `props` being passed to
+components are components that contain their own data, while
+stateless components only rely on the `props` being passed to
 them by a parent component.
 
 - **Class Components**
@@ -260,9 +263,18 @@ them by a parent component.
           date: new Date().toLocaleTimeString(),
           millisec: new Date().getTime()
         }
+      }
 
-        setInterval(() => this.setState({ date: new Date().toLocaleTimeString() }), 1000)
-        setInterval(() => this.setState({ millisec: new Date().getTime() }), 1)
+      // start timers after the component is mounted (not in the constructor),
+      // and clear them when it unmounts
+      componentDidMount() {
+        this.t1 = setInterval(() => this.setState({ date: new Date().toLocaleTimeString() }), 1000)
+        this.t2 = setInterval(() => this.setState({ millisec: new Date().getTime() }), 1) // browsers may clamp very small delays (to ~4ms)
+      }
+
+      componentWillUnmount() {
+        clearInterval(this.t1)
+        clearInterval(this.t2)
       }
 
       render() {
@@ -282,8 +294,13 @@ them by a parent component.
       const [ date, setDate ] = React.useState(new Date().toLocaleTimeString())
       const [ millisec, setMilliSec ] = React.useState(new Date().getTime())
 
-      setInterval(() => setDate(new Date().toLocaleTimeString()), 1000)
-      setInterval(() => setMilliSec(new Date().getTime()), 1)
+      // NOTE: never call setInterval directly in the function body, it would create
+      // new intervals on EVERY render (a leak), wrap it in useEffect and clean up
+      React.useEffect(() => {
+        const t1 = setInterval(() => setDate(new Date().toLocaleTimeString()), 1000)
+        const t2 = setInterval(() => setMilliSec(new Date().getTime()), 1)
+        return () => { clearInterval(t1); clearInterval(t2) }
+      }, [])
 
       return (
         <div>
@@ -340,7 +357,7 @@ return a calculated new `counter` value.
 
 ## **Component/Element Events**
 
-**React** event names are in **camelCase** style, e.g. **`onclick`**.
+**React** event names are in **camelCase** style, e.g. **`onClick`** (instead of HTML's `onclick`).
 
 In **JSX** we can assign an **event handler function** to an element
 by assigning a function directly inside a curly brace **`={}`**.
@@ -360,7 +377,9 @@ function NextButton (props) {
 On the example above, the **`<button>`** tag is our JSX element (which are similar 
 to HTML elements), the **`onClick`** is the event name, and the
 **`props.nextPicture`** is an event handler function that gets 
-executed whenever a user clicked the `NextButton` component's `<button>`.
+executed whenever a user clicks the `NextButton` component's `<button>`.
+
+NOTE: pass the function itself (`onClick={props.nextPicture}`), don't call it (`onClick={props.nextPicture()}` would run it during rendering).
 
 If an event handler has an argument, we can do it this way.
 
@@ -368,8 +387,8 @@ If an event handler has an argument, we can do it this way.
 function NextButton (props) {
   return (
     <button onClick={ () => {
-        props.nextPicture(args...)
-    }>
+        props.nextPicture(arg1, arg2)
+    }}>
       Next
     </button>
   )
@@ -399,7 +418,7 @@ function Form() {
 ## **Manually Binding A Method**
 
 When creating an event handler method for a **`class` component** it should
-be bounded to the class itself.
+be bound to the class instance (`this`), otherwise `this` will be `undefined` when the method is called as an event handler.
 
 One way to do this _explicitly_ is by manually binding a method inside a class
 **`constructor`**.
@@ -430,7 +449,7 @@ class Toggle extends React.Component {
 
 ## **Automatically Binding A Method**
 
-One way to bound a method to a **`class` component** _implicitly_ is by
+One way to bind a method to a **`class` component** _implicitly_ is by
 using a
 [**Public Instance Field**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Public_class_fields#public_instance_fields).
 
@@ -456,9 +475,7 @@ class Toggle extends React.Component {
 }
 ```
 
-React documentation says that this syntax is enabled by default in the 
-**Create React App**. (I don't know if that is the case if you set up react
-from scratch)
+Public class fields are standard JavaScript (ES2022), so this syntax works in all modern browsers and build tools (Create React App, Vite, Next.js, etc.), not just Create React App.
 
 ## **Bindings When Using A Function Component**
 
@@ -478,9 +495,11 @@ function Toggle (props) {
 }
 ```
 
-On some cases where we don't want to recreate the event handler function
-every time we re-render, similar to class components, we can instead use
-the `useCallback` hook to create our event handler.
+In some cases where we want the event handler function to keep the same
+identity between re-renders (e.g. when passing it to a child wrapped in `React.memo`,
+or using it as a dependency of another hook), we can use the `useCallback` hook
+to memoize our event handler (a new function is still created each render, but
+React returns the cached one as long as the dependencies don't change).
 
 ```jsx
 const handleClick = React.useCallback(() => {
@@ -539,9 +558,10 @@ Remember that we can always store an element to a local variable inside a scope,
 
 ```jsx
 render() {
+  const isLoggedIn = this.state.isLoggedIn;
   let button; // <- Element Variable
   
-  if (this.state.isLoggedIn) {
+  if (isLoggedIn) {
     button = <LogoutButton onClick={this.handleLogoutClick}/>;
   } else {
     button = <LoginButton onClick={this.handleLoginClick}/>;
@@ -563,7 +583,7 @@ function App (props) {
   return (
     <div>
       {props.show &&
-        <h1>I'm' Here!!!</h1>
+        <h1>I'm Here!!!</h1>
       }
     </div>
   )
@@ -571,6 +591,8 @@ function App (props) {
 
 root.render(<App show={false}/>)
 ```
+
+**Pitfall:** if the left side is a number, `0 && <h1/>` evaluates to `0` and React will render the `0`. Use a real boolean, e.g. `{count > 0 && <h1/>}`.
 
 ## **Conditional Rendering With Ternary Operator**
 
@@ -591,8 +613,10 @@ function App (props) {
 
 ## **Immediate Nesting Curly Braces `{}` Is Not Allowed In An Element**
 
-The following component will throw and error since it has 
-an immediate nested curly braces inside it.
+The following component will throw an error since it has 
+an immediately nested curly brace inside it. Inside `{ }` we are writing a JavaScript
+expression, so a `{` directly inside it is parsed as a JavaScript object literal (not JSX),
+and two expressions next to each other are not a single valid expression.
 
 ```jsx
 class App extends React.Component {
@@ -614,8 +638,8 @@ class App extends React.Component {
 
 ## **Proper Way To Nest Curly Braces `{}`**
 
-We need to enclose every curly braces inside a component/
-element for the nesting to work.
+We need to enclose every nested curly brace inside a component/
+element (JSX) for the nesting to work.
 
 ```jsx
 function ProperlyNested (props) {
@@ -693,7 +717,7 @@ root.render(<DisplayNames names={['Micha','Hanna','James','Henry']} />)
 ```
 
 If you look at the browser console, this will give you a warning because
-element keys are not provided in the JSX array collection.
+element keys are not provided in the JSX array collection (the same applies to the `Names` array in the previous example).
 
 ## **Keys For Element Collections**
 
@@ -719,14 +743,15 @@ function DisplayNames (props) {
 
 Same as the previous example, but with **index** as **keys**.
 
-One important side note though, **AVOID USING INDEX AS KEYS**.
+One important side note though, **AVOID USING INDEX AS KEYS** if the list can be reordered, filtered, or have items inserted/removed, since it can cause bugs with component state and worse performance. Prefer a stable unique id from your data; using the index is only OK for static lists that never change.
 
 ## **Keys Are Actually Not Element Attributes**
 
-Key serves as a hint to React, but they are not added to the 
+Keys serve as a hint to React, but they are not added to the 
 JSX element or component, meaning you will not be able to see
 the **`key`** attribute keyword in the resulting HTML element/
-tag of the final HTML output.
+tag of the final HTML output. They are also not passed to your component as a prop
+(`props.key` is `undefined`), so pass the value with a different prop name if the component needs it.
 
 ## **Setting Values Of Input Tags As State**
 
@@ -804,12 +829,15 @@ these types of components are called **controlled components** in react.
 
 ## **The `textarea` Tag**
  In react we can also access its contents the same way we access most
- `<input>` tags.
+ `<input>` tags. Unlike HTML, where the text goes between the tags, in React
+ a controlled `<textarea>` uses a `value` attribute: `<textarea value={text} onChange={handleChange} />`.
 
  ##  **The `select` Tag**
 
  We can also access the selected value in the `event.target.value`
- property of the event handler of `select` tag.
+ property of the event handler of `select` tag. Unlike HTML, where you put
+ the `selected` attribute on an `<option>`, in React you set `value` on the `<select>` itself
+ (e.g. `<select value={fruit} onChange={onSelection}>`).
 
  ```jsx
  <select onChange={onSelection}>
@@ -822,9 +850,10 @@ these types of components are called **controlled components** in react.
 
 ## **Accessing Other Properties Of Input Elements**
 
-Aside from the **value**, We can also access **some** (not all)
-**properties of elements** in react... Like the `<input>` by using the dot
-operator and the specific **property name**.
+Aside from the **value**, we can also access the other
+**properties of elements** in react, like the `<input>`, by using the dot
+operator and the specific **property name** (`e.target` is the actual DOM element,
+so any of its DOM properties can be read).
 
 ```jsx
 function AccessProperties (props) {
@@ -852,7 +881,7 @@ function AccessProperties (props) {
 
 ## **Handling Multiple Inputs**
 
-Here are some example how you can handle multiple input.
+Here are some examples of how you can handle multiple inputs.
 
 - **From the official react main guide documentation**
 
@@ -921,7 +950,7 @@ Here are some example how you can handle multiple input.
     render () {
       let inputValues = []
       for (let key in this.state) {
-        inputValues.push(<li keys={key}> { `${key} : ${this.state[key]}` } </li>)
+        inputValues.push(<li key={key}> { `${key} : ${this.state[key]}` } </li>)
       }
 
       return (
@@ -973,7 +1002,7 @@ This is equivalent to the ES5 syntax:
  
 ```jsx
 let NewState = {};
-NewState[name] = value;
+NewState[key] = value;
 this.setState(NewState);
 ```
 
@@ -990,7 +1019,7 @@ ReactDOM.createRoot(mountNode).render(<input value="hi" />);
 
 ## **Component Containment**
 
-Using the `prop.children` we can directly pass tag/elements and child
+Using `props.children` we can directly pass tag/elements and child
 components to a parent component by enclosing them within the parent
 component tag in the parent component. e.g.
 _`<> contain components... </>`_
@@ -1019,9 +1048,9 @@ function App () {
 }
 ```
 
-Though If we need a more customized way of placing children inside a
+Though if we need a more customized way of placing children inside a
 parent component, we can just directly pass a child component through
-child property.
+regular props (like `left` and `right` below).
 
 ```jsx
 function SplitPane(props) {

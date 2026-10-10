@@ -20,7 +20,7 @@ Node supports four basic stream types;
 
 <br>
 
-- **Transform** --> also writable and readable, but the data written to it becomes readable usually in some transformed from from the same stream.
+- **Transform** --> also writable and readable, but the data written to it becomes readable (usually in some transformed form) from the same stream.
     - The **```zlib.createGzip()```** function, for example, returns a Transform stream that compresses (with the gzip algorithm) the data written to it.
     - In a similar way, the **```crypto.createCipheriv()```** function returns a Transform stream that encrypts or decrypts data that is written to it.
 
@@ -29,7 +29,7 @@ Node supports four basic stream types;
 ### By default, streams read and write buffers.
 
 - If you call the **```setEncoding()```** method of a Readable stream, it will return decoded strings to you instead of Buffer objects.
-- And if you write a string to a Writable buffer, it will be automatically encoded using the buffer’s default encoding or whatever encoding you specify.
+- And if you write a string to a Writable stream, it will be automatically encoded using the stream's default encoding (`utf8`) or whatever encoding you specify.
 
 Node’s
 stream API also supports an “object mode” where streams read and

@@ -2,19 +2,19 @@
 
 ## **Variables**
 
-The **`let`** and **`const`** keywords is what we use in
+The **`let`** and **`const`** keywords are what we use in
 rust to create variables, **`let`** creates variables that
 are immutable by default (cannot be changed), but this can
 be disabled by adding a **`mut`** keyword after it.
 
 **`const`**
-on the other hand is always immutable and cannot be change, this
+on the other hand is always immutable and cannot be changed, this
 value is also computed at compile time (they can only accept
-constant expressions).
+constant expressions), and a type annotation is always required.
 
 ### **Create an immutable variable**
 
-Will met error at compile time if we assign new
+You will get a compile-time error if you assign a new
 value to the variable `x`.
 
 ```rust
@@ -34,7 +34,7 @@ const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 ### **Shadowing - overriding a variable name in an inner scope**
 ```rust
 let x = 5;
-let x = 10; // overrides the first declaration.
+let x = 10; // shadows the first declaration.
 {
     // use the old value then overrides the `x`
     // again, but only in the inner scope.
@@ -52,7 +52,7 @@ println!("x = {x}");
     it allows us to change both of its value and type.
 
     ```rust
-    let spaces = "   "; // string to
+    let spaces = "   "; // string slice (&str)
     let spaces = spaces.len(); // integer
     ```
 

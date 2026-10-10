@@ -103,7 +103,7 @@ b *0x401234       # break at address
 ```
 
 To **show breakpoint** and **watchpoint** numbers use the command
-below, you could also use `info watch` for displaying watchpoints
+below, you could also use `info watchpoints` for displaying watchpoints
 only.
 
 ```bash
@@ -121,7 +121,7 @@ delete     # delete all breakpoints (removes them)
 
 **Enable/Disable breakpoints**
 
-Disable is usefull if you just want to temporarily disable a
+Disable is useful if you just want to temporarily disable a
 breakpoint, not completely delete it so you can use it later.
 
 ```bash
@@ -156,6 +156,9 @@ condition <breakpoint-number> <expr>
 watch <expression>  # break when expression is written (value changes)
 rwatch <expression> # break when expression is read
 awatch <expression> # break when expression is read or written
+
+# watchpoint that only triggers when the condition is true
+watch <expression> if <condition>   # e.g., watch total if total > 100
 ```
 
 ---
@@ -166,7 +169,7 @@ awatch <expression> # break when expression is read or written
 
 just press `ctrl+c`.
 
-usefull when debugging an infinite loop, you could find out why is it happening.
+useful when debugging an infinite loop, you could find out why it is happening.
 
 #### `step`
 
@@ -187,10 +190,11 @@ call in the current frame (it **"steps over"** the function).
 n <optional-number-of-next-lines>
 ```
 
-For assembly level next, use the command below.
+For assembly level next (executes one machine instruction, stepping over calls), use the command below.
+Use `stepi` (`si`) if you want to step into calls at the instruction level.
 
 ```bash
-nexti <optional-number-of-next-lines>
+nexti <optional-number-of-instructions>
 ```
 
 #### `continue`
@@ -220,7 +224,8 @@ finish
 
 #### Print a Variable using `print` or `p`.
 
-(works with function calls too?)
+It also works with function calls in your program, e.g. `print foo(3)` or `print obj.method()`
+(as long as the function was compiled into the binary and not completely inlined away).
 
 ```bash
 print <variable-name-of-code or expression>
@@ -241,19 +246,20 @@ Note: 0x0 is numeric zero; for pointers that means `NULL`.
 
 See `help x` for more info on the FMT (format) switches.
 
-#### Print Array Memory Addresses
+#### Print Array Elements
 
 ```bash
 # print 10 elements starting at pointer p (assumes p points to int)
 p *p@10
 
-# if p is an array object, p@10 prints 10 elements
-p p@10
+# if arr is an array object, `p arr` prints the whole array,
+# and `p arr[0]@10` (or `p *arr@10`) prints the first 10 elements
+p arr[0]@10
 ```
 
 you could also print std::vector to see its value `print vec_name`, and even call the methods of std::vector and see the result `print vec_name.size()`.
 
-I don't know if this extends to other classes and stl type or maybe even your own class or type, but it's free to try.
+Printing STL containers nicely works because of GDB's Python "pretty printers" (shipped with libstdc++). Your own classes/structs can also be printed (all members are shown), and their methods can be called too, but only if the method exists in the binary (template methods or inline methods that were never used/instantiated, or were inlined away, cannot be called).
 
 #### Low-Level memory examine
 
@@ -266,7 +272,7 @@ x/10x p    # 10 words in hex
 #### Print Array Values
  
 ```bash
-print *ptr@element-size
+print *ptr@number-of-elements
 ```
 
 #### Watch / Delete / Display
@@ -286,7 +292,7 @@ display /x <expr>    # show in hex
 undisplay <n>    # where n is the display number shown by 'info display'
 ```
 
-#### Print all function call
+#### Print all function calls (call stack)
 
 `bt` alone prints a summary of the stack frames. Each line typically includes the frame number, the function name,
 and sometimes the line number and source file where the call originated. It provides a concise overview of the call stack.
@@ -317,7 +323,7 @@ info source     # info about the current source file
 #### Change variable value
 
 ```bash
-set <variable-name> <value>
+set var <variable-name> = <value>
 
 # or
 set variable x = 42 # recommended form
@@ -325,7 +331,7 @@ set variable x = 42 # recommended form
 # or shorthand:
 set var x = 42
 
-# older form sometimes used:
+# older form sometimes used (avoid it, it can clash with gdb's own `set` sub-commands, e.g. a variable named `width`):
 set x = 42
 ```
 
@@ -398,8 +404,8 @@ multi-threaded program.
   thread apply all bt
   ```
 
-- This command applies the print my_variable command to threads
-with IDs 1 and 3. Applying to all threads.
+- This command applies the `print <variable>` command to threads
+with IDs 1 and 3.
  
   ```bash
   thread apply 1 3 print <variable>
@@ -413,8 +419,8 @@ with IDs 1 and 3. Applying to all threads.
 
 - The `-c` flag (continue) ensures that if an error occurs while 
 applying print my_variable to a thread, the thread apply command
-continues to execute for other threads instead of aborting. 
-Applying silently.
+continues to execute for other threads instead of aborting
+(the error messages are still printed).
  
   ```bash
   thread apply all -c print <variable>
@@ -423,15 +429,15 @@ Applying silently.
 - The `-s` flag (silent) suppresses error messages or empty output
 from the applied command, which can be useful when you expect some
 commands to only apply to a subset of threads or to produce no
-output in certain cases. Applying in a specific order.
+output in certain cases.
 
   ```bash
   thread apply all -s print my_variable
   ```
 
-- This command applies the `bt` command to all threads in ascending
-order of their thread IDs. Similarly, `-descending` can be used for
-descending order.
+- By default `thread apply all` goes through the threads in descending
+order of their thread IDs. The `-ascending` flag makes it go in ascending
+order instead (there is no `-descending` flag since that is already the default).
 
   ```bash
   thread apply all -ascending bt
@@ -448,7 +454,7 @@ descending order.
 * `info inferiors` - list processes gdb controls.
 * `inferior <n>` - switch to inferior number n.
 * `attach <pid>` / `detach` - attach to or release an external process.
-* `info breakpoints` / deferred breakpoints - set breakpoints before the new image loads; gdb will resolve them at load time.
+* `info breakpoints` / pending (deferred) breakpoints - set breakpoints before the new image loads; gdb will resolve them at load time.
 
 #### Fork - follow the child
 
@@ -511,10 +517,10 @@ run
 
 ## Others
 
-### Refresh the Screen if the design broke
+### Refresh the Screen if the TUI display gets garbled
 
 ```bash
-refresh
+refresh   # or press ctrl+l
 ```
 
 ### Quit

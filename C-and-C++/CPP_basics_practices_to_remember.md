@@ -1,16 +1,14 @@
 ### Don't Forget
-- always put your framwork api inside a **namespace**
+- always put your framework API inside a **namespace**
   - if the namespace is too long you can shorten it by aliasing a new namespace in a code block ex. ```namespace shorterNameSpace = std::a::very::long::nested::namespace::names;```
-- virtual functions in base class should be overriden with the same function signatures in the derived class (same return type, same parameter counts, and same parameter type)
-- it would be much better to always make a virtual destructor for base classes for derived classes to override
+- virtual functions in a base class should be overridden with the same function signature in the derived class (same parameter count, same parameter types, and same const/ref qualifiers); the return type must also be the same, except for covariant return types (e.g. returning `Derived*` where the base returns `Base*`)
+- a base class that is meant to be used polymorphically (deleted through a base-class pointer) should have a **virtual destructor**, otherwise deleting a derived object through a base pointer is undefined behavior
 - when you have a method that is intended to not change class members, always put **const** after it
-- when you have a method that is an overide from a base class' virtual function, always put **override** after it
-- to disable annoying unused parameter warnings, just don't put a parameter name in the method declarations
-- always remember to declare and define **constructor and destructors**
-- always remember to declare and define **copy & move constructors**
-- always remember to overload **copy & move assignment operators**
-- always put **noexcept** after move constructors and move assignment operators function signatures 
-- improve locality of reference
-  - Temporal locality
-  - Spatial locality
-  - Memory locality
+- when you have a method that is an override of a base class' virtual function, always put **override** after it
+- to disable annoying unused parameter warnings, leave out the parameter name in the function definition (or mark it `[[maybe_unused]]` in C++17)
+- **Rule of Zero**: if your class only uses members that manage themselves (`std::string`, `std::vector`, smart pointers...), don't declare any of the special member functions and let the compiler generate them
+- **Rule of Five**: if your class manages a resource directly and you need to define any one of the **destructor, copy constructor, copy assignment operator, move constructor, or move assignment operator**, then you should define (or explicitly `= default` / `= delete`) all five
+- always put **noexcept** after the move constructor and move assignment operator function signatures
+- improve locality of reference (memory locality)
+  - Temporal locality - recently accessed data is likely to be accessed again soon
+  - Spatial locality - data near recently accessed data is likely to be accessed soon

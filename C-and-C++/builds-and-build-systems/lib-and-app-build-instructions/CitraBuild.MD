@@ -2,7 +2,7 @@
 
 ## Configure Build
 
-remove the `-stdlib=libc++` if not working
+remove the `-stdlib=libc++` if not working (it requires LLVM's libc++ to be installed, e.g. `libc++-dev libc++abi-dev`)
 
 ```
 cmake ../ -DCMAKE_BUILD_TYPE=Release -DENABLE_FFMPEG_AUDIO_DECODER=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_FLAGS="-fbracket-depth=1024 -O3 -stdlib=libc++"
@@ -20,4 +20,6 @@ This is optional
 
 ```
 sudo make install
+# or, generator independent:
+# sudo cmake --install .
 ```

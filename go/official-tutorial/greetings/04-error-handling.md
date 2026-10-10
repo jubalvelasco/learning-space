@@ -1,9 +1,9 @@
 # Error Handling
 
-Import the error handling module
+Import the `errors` package from the standard library
 
 ```go
-import error
+import "errors"
 ```
 
 Add error handling to a function
@@ -31,4 +31,14 @@ func Hello(name string) (string, error) {
     message := fmt.Sprintf("Hi, %v. Welcome!", name)
     return message, nil
 }
+```
+
+The caller now has to handle both return values:
+
+```go
+message, err := greetings.Hello("")
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(message)
 ```

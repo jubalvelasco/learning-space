@@ -30,8 +30,21 @@ $$
 x^2+y^2+Dx+Ey+F=0
 $$
 
-## **General Form to Circle-Radius Form**
+## **General Form to Center-Radius Form**
+
+Group the $x$ and $y$ terms, move $F$ to the right side, then complete the square for both $x$ and $y$
+(add $\left(\dfrac{D}{2}\right)^2$ and $\left(\dfrac{E}{2}\right)^2$ to both sides):
 
 $$
-\left(  \right)
+\begin{align}
+x^2 + Dx + y^2 + Ey &= -F \\
+\left(x^2 + Dx + \dfrac{D^2}{4}\right) + \left(y^2 + Ey + \dfrac{E^2}{4}\right) &= \dfrac{D^2}{4} + \dfrac{E^2}{4} - F \\
+\left(x + \dfrac{D}{2}\right)^2 + \left(y + \dfrac{E}{2}\right)^2 &= \dfrac{D^2 + E^2 - 4F}{4}
+\end{align}
 $$
+
+So the center is $C\left(-\dfrac{D}{2}, -\dfrac{E}{2}\right)$ and the radius is $r = \dfrac{\sqrt{D^2 + E^2 - 4F}}{2}$.
+
+- If $D^2 + E^2 - 4F > 0$ it is a real circle.
+- If $D^2 + E^2 - 4F = 0$ it is just a single point (the center).
+- If $D^2 + E^2 - 4F < 0$ there is no real circle.

@@ -48,14 +48,14 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 
 ## Setup After Installation
 
-### 0. See If Docker Services are enables
+### 0. See If Docker Services are enabled
 
 ```
 sudo systemctl status docker.service
 sudo systemctl status containerd.service
 ```
 
-### 1. Enable Docker Service If Not Enables When Booting
+### 1. Enable Docker Service If Not Enabled When Booting
 
 ```
 sudo systemctl enable docker.service
@@ -68,6 +68,8 @@ sudo systemctl disable containerd.service
 
 ### 2. Add docker usergroup
 
+The `docker` group is usually already created by the package installation; if it is, this command just reports that it already exists.
+
 ```
 sudo groupadd docker
 ```
@@ -77,6 +79,8 @@ sudo groupadd docker
 ```
 sudo usermod -aG docker $USER
 ```
+
+NOTE: members of the `docker` group effectively have root-level privileges on the machine, so only add trusted users.
 
 Log out and log back in so that your group membership is re-evaluated
 

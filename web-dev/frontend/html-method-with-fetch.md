@@ -1,4 +1,4 @@
-### HTML Request Methods using JavaScript Fetch API
+### HTTP Request Methods using JavaScript Fetch API
 
 For more detailed information, access the MDN documentation for **[fetch() API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)**.
 
@@ -8,24 +8,30 @@ For more detailed information, access the MDN documentation for **[fetch() API](
     
     ```js
     let response = await fetch('/records');
+    if (!response.ok) { // fetch() only rejects on network errors, NOT on HTTP errors like 404 or 500
+      throw new Error(`HTTP error: ${response.status}`);
+    }
     let data = await response.json();
     ```
 
+    NOTE: fetch normalizes the standard method names (`get`, `post`, `put`, `delete`...) to uppercase, but not `patch`, so always write `'PATCH'` in uppercase.
+
 - **Get Request**
 
-    The get request is the same as inputing a URL in the browser, or redirecting to a link or another endpoint.
+    The get request is the same as entering a URL in the browser, or redirecting to a link or another endpoint.
 
-    It could contain parameter values that will sent in the backend, either supply it with **[Request Query Parameters](../backend/fastify/f03-routing/basics.md)** or just **[Request Parameters](../backend/fastify/f03-routing/basics.md)**.
+    It could contain parameter values that will be sent to the backend, either supply it with **[Request Query Parameters](../backend/fastify/f03-routing/basics.md)** or just **[Request Parameters](../backend/fastify/f03-routing/basics.md)**.
     
     If not specified, the ```fetch()``` api will use a **GET** request by default.
     ```js
-    fecth('/getEndPoint');
+    fetch('/getEndPoint');
+    ```
 
 - **Post Request**
 
     The ```/SaveEndPoint``` example is the route end point or action for the **POST** request.
 
-    The **POST** will contain a **Body** content, This request is mainly use when saving data to the backend.
+    The **POST** will contain a **Body** content, this request is mainly used when saving (creating) data in the backend.
 
     ```js
     fetch('/SaveEndPoint', {
@@ -83,7 +89,7 @@ For more detailed information, access the MDN documentation for **[fetch() API](
 
     The ```/ParametersOrQuery``` are the values that will be used during the delete process in the backend, either supply it with **[Request Query Parameters](../backend/fastify/f03-routing/basics.md)** or just **[Request Parameters](../backend/fastify/f03-routing/basics.md)**.
 
-    Just like the **GET** request, the **DELETE** request don't have a body.
+    Just like the **GET** request, the **DELETE** request usually doesn't have a body (a body is allowed, but it has no defined meaning and some servers ignore it).
 
     ```js
     fetch('/DeleteEndPoint/ParametersOrQuery', {

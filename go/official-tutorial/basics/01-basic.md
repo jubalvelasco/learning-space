@@ -10,7 +10,7 @@
 
     There is a proper module naming convention **if you want to share your module with other developers**.
 
-    But for a **non-module project**, not setting up a `<package-name>` format in the command is usually not that important, but still it's much better to add this for formality.
+    But for a project that you won't publish, the exact `<source>/<package-name>` format of the module path is not that important (any name like `example.com/<package-name>` works), but still it's much better to follow it for formality.
 
 2. **Paste this code in the : `<package-name>.go` file.**
 
@@ -47,7 +47,7 @@ go help
 
 # Using other Modules Published by Developers
 
-The https://pkg.go.dev/ is like the **npm registry** of the go programming language, you can see here different go packages or modules that you can use through out your project.
+The https://pkg.go.dev/ is like the **npm registry** website of the go programming language (although Go modules are actually downloaded from their source repositories, through the Go module proxy), you can see here different go packages or modules that you can use throughout your project.
 
 As an example we can search the "quote" package in the go package registry, click the `rsc.io/quote` and look at the function in the documentation that we can use inside our module/package in this case the `Go` function.
 

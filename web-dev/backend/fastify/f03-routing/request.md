@@ -1,5 +1,7 @@
 # DOCS FROM FASTIFY's REPOSITORY
 
+> NOTE: this is a copy of an older version of the docs. In newer Fastify versions `routerMethod`, `routerPath`, `context` and `connection` are deprecated/removed; use `request.routeOptions.method`, `request.routeOptions.url` and `request.routeOptions.config` (and `request.socket`) instead. The relative links below point to the original repository's docs folder.
+
 <h1 align="center">Fastify</h1>
 
 ## Request
@@ -54,7 +56,7 @@ request.headers = {
 ```
 
 This operation will add to the request headers the new values that can be read
-calling `request.headers.bar`. Moreover, you can still access the standard
+calling `request.headers.foo`. Moreover, you can still access the standard
 request's headers with the `request.raw.headers` property.
 
 > Note: For performance reason on `not found` route, you may see that we will

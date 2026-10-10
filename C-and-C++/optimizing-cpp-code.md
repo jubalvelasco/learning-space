@@ -19,7 +19,7 @@ In general, try to implement compile-time preprocessing setup techniques as much
 
 ### **Put Objects on the Stack to Reduce Memory Allocations and Deallocations**
 
-Since the stack is faster to access than the heap, consider placing objects on the stack whenever possible.
+Allocating on the stack is much cheaper than allocating on the heap (it's just moving the stack pointer, no call to `malloc`/`new`), and stack memory is usually already hot in the CPU cache, so consider placing objects on the stack whenever possible. (Note: once allocated, reading/writing stack or heap memory is the same kind of RAM access, the speed difference mostly comes from allocation cost and cache locality.)
 
 For small to medium-sized arrays, prefer placing them on the stack, especially if they are fixed-size arrays.
 
@@ -31,7 +31,7 @@ If you find yourself performing constant allocation and deallocation inside a lo
 
 Using SIMD vector registers through inline assembly or C/C++ intrinsic functions can optimize your code.
 
-Additionally, casting to larger types (e.g., casting a 64-byte `unsigned char` to a double element `unsigned int` array) can sometimes improve code performance. Taking advantage of wider register instruction operations when using larger data types, similar to SIMD vector registers but with limitations, can also be beneficial.
+Additionally, processing data using larger types (e.g., treating a 64-byte `unsigned char` array as a 16-element `uint32_t` array, or an 8-element `uint64_t` array) can sometimes improve code performance. Taking advantage of wider register instruction operations when using larger data types, similar to SIMD vector registers but with limitations, can also be beneficial. Be careful: directly `reinterpret_cast`-ing between unrelated types violates the strict aliasing rule and may also be misaligned (undefined behavior), so use `std::memcpy` (or `std::bit_cast` in C++20) to move the bytes, the compiler will optimize the copy away.
 
 However, keep in mind that in most cases, the compiler can handle these optimizations automatically. It's still recommended to check the assembly output frequently using tools like Godbolt to verify the compiler's optimizations.
 
@@ -47,6 +47,6 @@ Memory alignment is related to this concept, but I haven't fully grasped it yet.
 
 In most scenarios, simpler code tends to perform faster. Reducing complexity leads to less work, resulting in improved performance. This principle holds true for C++ code as well.
 
-1. Use algorithms with lower time complexity. However, keep in mind that memory allocation and deallocation can also impact program speed. For example, quicksort is often faster than mergesort, even if they have the same time complexity.
+1. Use algorithms with lower time complexity. However, keep in mind that memory allocation and deallocation (and cache behavior) can also impact program speed. For example, quicksort is often faster than mergesort in practice, even though both are O(n log n) on average (quicksort sorts in place with good cache locality, while mergesort needs an O(n) extra buffer; note that quicksort's worst case is O(n²)).
 
 2. If possible, simplify or take shortcuts in the code. Constant expressions can be useful in such cases. Sometimes, we can take a shortcut, but the preprocessing setup required to do so may be performance-expensive. In such situations, consider performing the computation at compile time.

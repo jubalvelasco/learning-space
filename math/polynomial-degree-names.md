@@ -1,7 +1,7 @@
 # **Polynomial Degree Names**
 
-- **Special case** – zero (see § Degree of the zero polynomial, below)
-- **Degree 0** – non-zero constant[5]
+- **Special case** – the zero polynomial (its degree is either left undefined, or defined as $-1$ or $-\infty$)
+- **Degree 0** – non-zero constant
 - **Degree 1** – linear
 - **Degree 2** – quadratic
 - **Degree 3** – cubic

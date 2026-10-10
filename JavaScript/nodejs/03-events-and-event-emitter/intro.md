@@ -1,6 +1,6 @@
 ## Events and EventEmitter
 
-As described, all of Node’s APIs are asynchronous by default.
+As described, most of Node’s APIs are asynchronous by default (some also have synchronous versions, e.g. `fs.readFileSync`).
 
 For many of them, this asynchrony takes the form of two-argument _**error-first** callbacks_ that are invoked when the requested operation is complete.
 
@@ -8,7 +8,7 @@ For many of them, this asynchrony takes the form of two-argument _**error-first*
 foo('param',(error,value) => {
     // error-first callback
     // takes a callback that has
-    // error as it's _first argument
+    // error as its first argument
     // then the value argument
 });
 ```

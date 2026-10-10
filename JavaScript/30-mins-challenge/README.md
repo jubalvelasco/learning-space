@@ -5,4 +5,4 @@
     - Queues
     - Stacks
     
-2. implement the following algorithms withing 30 mins
+2. implement the following algorithms within 30 mins

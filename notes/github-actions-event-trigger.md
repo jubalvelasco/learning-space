@@ -36,7 +36,7 @@ on:
       - 'releases/**'
 ```
 
-#### Run when someone pushes to any branch that is NOT `main` or NOT to a branch that starts with `releases/`
+#### Run when someone pushes to any branch that is neither `main` nor a branch that starts with `releases/`
 
 ```yml
 on:
@@ -81,6 +81,8 @@ on:
 ## Schedules
 
 #### This example triggers the workflow every day at 5:30 and 17:30 UTC
+
+(scheduled workflows always use UTC, and may be delayed during periods of high load)
 
 ```yml
 on:

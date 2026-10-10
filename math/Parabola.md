@@ -12,13 +12,15 @@
     ***standard form*** :
     $(y-k)^2 = 4a(x-h)$
 
-**Length of the Latus Rectum** = $4a$
+**Length of the Latus Rectum** = $|4a|$
 
-**Latus Rectum Coordinate** = $\pm 2a$, add to the focus
+**Latus Rectum Coordinate** = $\pm 2a$, add to the focus (in the direction perpendicular to the axis of symmetry)
+
+**Direction**: if $a > 0$ the parabola opens up (vertical) / right (horizontal); if $a < 0$ it opens down / left.
 
 ### **Coordinates**
 
-- **Vertex/Center** $(h,k)$
+- **Vertex** $(h,k)$ (a parabola has no center)
 
 - **Focus**
     - horizontal facing : $(h + a, k)$

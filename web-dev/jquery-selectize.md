@@ -11,7 +11,10 @@ const userDetails = {
   verified: false
 };
 
-let cloneUser = { ...userDetails };
+let cloneUser = { ...userDetails }; // shallow copy: nested objects/arrays are still shared
+
+// deep copy (modern browsers / Node.js 17+)
+let deepCloneUser = structuredClone(userDetails);
 ```
 
 ## remove option
@@ -24,7 +27,7 @@ jQuery('#_emp_language1')[0].selectize.removeOption('Arabic')
 
 ## get current selected value
 
-will return an empty string (`''`) if there is no selection.
+will return an empty string (`''`) if there is no selection (for a multi-select it returns an array instead, empty if nothing is selected).
 
 ```js
 jQuery('#_emp_language1')[0].selectize.getValue()

@@ -1,4 +1,4 @@
-# What are multiplexer or mux in web development?
+# What is a multiplexer (mux) in web development?
 
 ## The big picture
 
@@ -209,7 +209,7 @@ The router examines the request and dispatches accordingly.
 
 # 6) Multiplexer / mux
 
-A **multiplexer** is a general computer science term meaning a component that selects one of many inputs or paths and routes it to the right destination.
+A **multiplexer** is a general electronics / computer science term for a component that selects one of many inputs and forwards it to a single output (the reverse, sending one input to one of many outputs, is strictly called a **demultiplexer**).
 
 In web development, a **mux** is usually just a router.
 
@@ -217,7 +217,7 @@ For example, in Go’s `net/http`, `http.ServeMux` is the standard request multi
 
 ### Why the name?
 
-Because it “multiplexes” many possible request paths into the correct handler.
+Because it sits between many possible request paths and many handlers and selects the right pairing. (Technically, sending each incoming request to one of many handlers is closer to *demultiplexing*, but "mux" is the name that stuck, e.g. Go's `ServeMux` and the `gorilla/mux` package.)
 
 ### In practical web-dev usage
 
@@ -392,7 +392,7 @@ const server = http.createServer((req, res) => {
 });
 ```
 
-Here, that `if`/`switch` block is your manual mux/router. ([Node.js][1])
+Here, that `if`/`switch` block is your manual mux/router (note: `req.url` also contains the query string, e.g. `/users?page=2`, so real code should parse it with `new URL(req.url, 'http://localhost')` first). ([Node.js][1])
 
 ## 2) Express.js
 

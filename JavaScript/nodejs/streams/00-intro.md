@@ -20,7 +20,7 @@ function copyFile(sourceFilename, destinationFilename, callback) {
 
 ## This function though is inefficient
 
-Even though it uses ```fs.readFile()``` & ```fs.writeFile()``` which is both an **async non-blocking** function... The big problem is when we are reading a very large file (example <= 1GB), this function would allocate the exactyl the same size in memory, that alone is already slow, it might not block the main code flow, but it will block other calls of ```fs.readFile()``` & ```fs.writeFile()```. And it will also possibly slow down the server that has a very limited amount of RAM.
+Even though it uses ```fs.readFile()``` & ```fs.writeFile()``` which are both **async non-blocking** functions... The big problem is when we are reading a very large file (example >= 1GB), this function would allocate exactly the same amount of memory to hold the whole file, that alone is already slow and wasteful, it might not block the main code flow, but it can't start writing anything until the whole file has been read, and copying several big files at the same time can easily exhaust the server's RAM (and a single Buffer also has a maximum size, so files bigger than that can't be read this way at all).
 
 ---- 
 

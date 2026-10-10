@@ -2,32 +2,32 @@
 
 ### UTF-8 Strings
 
-**Create a string using the string class**
+**Create a string using the `String` type**
 
 ```rust
 // UTF-8 string
-let str = String::new();
+let mut s = String::new(); // must be `mut` to be able to append to it
 let name = String::from("from a hard-coded string");
 ```
 
 **Append to string**
 
 ```rust
-str.push_str("string literal");
-str.push_str(&heap_string);
-str.push_str(stack_string);
-str.push('c');
+s.push_str("string literal");
+s.push_str(&heap_string);   // &String coerces to &str
+s.push_str(str_slice);      // a &str
+s.push('c');                // a single char
 ```
 
 **Remove front and back white spaces**
 
 ```rust
-str.trim();
+let trimmed: &str = s.trim(); // returns a new string slice, `s` itself is not modified
 ```
 
 **Converting to other types**
 
-The `.parse()` method automatically detects the type anotation `usize` so it can convert the type accordingly.
+The `.parse()` method uses the type annotation `usize` (type inference) to know which type to convert to. It returns a `Result`, since the conversion can fail.
 
 ```rust
 let str_idx = String::from("102");

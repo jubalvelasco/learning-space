@@ -1,24 +1,26 @@
 # Down casting & `dynamic_cast`
     
-- **Upcasting** - assigning a pointer of a ```derived class``` into a ```base class``` (usually done by the compiler implicitly so there is not problems with this)
-- **Down casting** - the act for assigning a pointer of a ```base class``` to a ```derived class```, here we should use dynamic_cast for safe casting
+- **Upcasting** - assigning a pointer of a ```derived class``` to a pointer of a ```base class``` (done implicitly by the compiler and always safe, so there are no problems with this)
+- **Down casting** - the act of assigning a pointer of a ```base class``` to a pointer of a ```derived class```, here we should use dynamic_cast for safe casting
 
 **A sample program showing how to use a dynamic cast**
     
-NOTE: dynamic_cast can only be used in polymorphic classes, or classes with virtual functions
+NOTE: dynamic_cast (for downcasting) can only be used with polymorphic classes, i.e. classes with at least one virtual function. If the cast fails, it returns `nullptr` for pointers, or throws `std::bad_cast` for references.
     
 ```c++
 #include <iostream>
-#include <vector>
+#include <string>
 
 class person
 {
     private:
         std::string name;
+        unsigned int age;
+        char gender;
     
     public:
         person(const std::string& ID, const std::string& name, unsigned int age, char gender)
-        : ID(ID), name(name), age(age), gender(gender) {}
+        : name(name), age(age), gender(gender), ID(ID) {}
 
         std::string ID;
 
@@ -57,29 +59,33 @@ int main()
     student* student2 = dynamic_cast<student*>(Aldino);
 
     // ---------- check if student 1 is a real student ----------
-    if(student1!=NULL)
+    if(student1!=nullptr)
         std::cout << student1->getName() << " is a real student\n";
     else
         std::cout << "Detected a fake student\n";
     
     // ---------- check if student 2 is a real student ----------
-    if(student2!=NULL)
+    if(student2!=nullptr)
         std::cout << student2->getName() << " is a real student\n";
     else
         std::cout << "Detected a fake student\n";
     
+    delete Micha;
+    delete Aldino;
     return 0;
 }
 ```
     
 **Output if dynamic_cast is used**
 ```shell
-Micah is a real student
+Micha is a real student
 Detected a fake student
 ```
 
 **Output if static_cast is used**
 ```shell
-Micah is a real student
+Micha is a real student
 Aldino is a real student
 ```
+
+NOTE: with `static_cast` there is no runtime check, so `student2` points to a `teacher` object treated as a `student`. Using it is **undefined behavior**; the output above is just what typically happens, it is not guaranteed.

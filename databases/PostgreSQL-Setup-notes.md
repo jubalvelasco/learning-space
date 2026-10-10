@@ -19,7 +19,7 @@ sudo apt update
 sudo apt -y install postgresql
 ```
 
-## Creating and Deleteing Roles/Users From PostgreSQL promt
+## Creating and Deleting Roles/Users From PostgreSQL prompt
 
 ```bash
 # login to the default postgres user environment
@@ -27,28 +27,28 @@ sudo -i -u postgres
 
 # =============== default postgres user environment starts here ==============
 
-# access postgres promt
+# access postgres prompt
 psql
 
-# ======================== postgres promt starts here ========================
+# ======================== postgres prompt starts here ========================
 
-# list all current roles (inside postgres promt)
+# list all current roles (inside postgres prompt)
 \du
 
-# create new role (inside postgres promt)
+# create new role (inside postgres prompt)
 CREATE ROLE <new_role_name>;
 
-# delete a role (inside postgres promt)
+# delete a role (inside postgres prompt)
 DROP ROLE <role_name>;
 # or
 DROP ROLE IF EXISTS role_name;
 
-# exit postgres promt
-exit
+# exit postgres prompt (`exit` also works in PostgreSQL 11+)
+\q
 
-# ======================== postgres promt ends here ==========================
+# ======================== postgres prompt ends here ==========================
 
-# exitpostgres server
+# exit the postgres user shell
 exit
 
 # =============== default postgres user environment ends here ================
@@ -92,32 +92,25 @@ sudo -i -u postgres
 
 # =============== default postgres user environment starts here ==============
 
-# access postgres promt
-psql
+# NOTE: `createuser` is a shell program, NOT a psql command,
+# so run it in the postgres user's shell (do not open psql first)
 
-# ======================== postgres promt starts here ========================
-
-# list all current roles (inside postgres promt)
-\du
-
-# create new role with permission yes or no question promts
+# create new role with permission yes or no question prompts
 createuser --interactive
 
 # answer the questions with y or n ...
 
-# exit postgres promt
-exit
+# (optional) open psql and list all current roles to verify
+psql -c '\du'
 
-# ======================== postgres promt ends here ==========================
-
-# exitpostgres server
+# exit the postgres user shell
 exit
 
 # =============== default postgres user environment ends here ================
 
 ```
 
-## Edit Role Premissions
+## Edit Role Permissions
 
 ```bash
 # see different options above similar in role creation
@@ -136,7 +129,7 @@ ALTER ROLE <role_name> [ WITH ] option [ ... ]
 GRANT <permission_type> ON <table_name> TO <role_name>;
 
 # revoke permissions
-REVOKE <permission_type> ON <table_name> FROM <user_name>;
+REVOKE <permission_type> ON <table_name> FROM <role_name>;
 
 # use command below to see different permission types
 # \h GRANT

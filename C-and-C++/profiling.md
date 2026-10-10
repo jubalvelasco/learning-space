@@ -2,7 +2,7 @@
 
 ### **Sampling Profiler**
 
-- vTune
+- Intel VTune
 
 ### **Instrumentation Profiler**
 

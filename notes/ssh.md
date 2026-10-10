@@ -11,20 +11,22 @@ authorized_keys2  id_dsa       known_hosts
 config            id_dsa.pub
 ```
 
-You’re looking for a pair of files named something like `id_dsa` or `id_rsa` and
+You’re looking for a pair of files named something like `id_ed25519`, `id_rsa` or `id_dsa` and
 a matching file with a `.pub` extension. The `.pub` file is your public key,
 and the other file is the corresponding private key.
+
+NOTE: DSA (`id_dsa`) keys are obsolete and disabled by default in modern OpenSSH; prefer Ed25519 keys (`ssh-keygen -t ed25519`), or RSA with at least 3072 bits.
 
 # [Generate SSH key (click here)](https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key)
 
 If you don’t have these files (or you don’t even have a .ssh directory), you can create them by running a program called `ssh-keygen`, which is _provided with the SSH package on Linux/macOS_ systems and comes with _Git for Windows_:
 
 
-SSH files should appear in your `~/.shh` for ubuntu systems.
+SSH files should appear in your `~/.ssh` for ubuntu systems.
 
 # Authenticating Users
 
-This section follows the git tutorial on [how to setup a Git sever](https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server).
+This section follows the git tutorial on [how to set up a Git server](https://git-scm.com/book/en/v2/Git-on-the-Server-Setting-Up-the-Server).
 
 we will use the `authorized_keys` method for authenticating our users.
 
@@ -64,38 +66,37 @@ YOU CAN NOW LOGIN VIA SSH KEY IN YOUR LOCAL MACHINE
     ```
 
 2. On the other hand if your key is not named as `id_rsa` or `id_ed25519` then
-you will need to manually supply it yourself to the command.
+you will need to manually supply it yourself to the command. Note that `-i` takes the **private** key file (the one without `.pub`).
 
     ```
-    ssh -i <pub-key-filename> <user_name>@<ip/domain>
+    ssh -i <private-key-filename> <user_name>@<ip/domain>
     ```
 
-3. Specifying a port number - sometimes ssh use port 8022 instead of the usual port 22 to as an extra layer of security against automated attacks that target port 22.
+3. Specifying a port number - sometimes an ssh server listens on a different port (e.g. 8022) instead of the usual port 22, to reduce noise from automated attacks that target port 22 (this is obscurity, not real security, so still use keys and disable password login).
 
     ```bash
-    ssh -i <pub-key-filename> <user_name>@<ip/domain> -p 8022
+    ssh -i <private-key-filename> <user_name>@<ip/domain> -p 8022
     ```
 
 # Permission Classes
 
-We can then futher add a little bit more layer of security in our `.ssh` directory
+We can then further add a little bit more security to our `.ssh` directory
 by:
 
 ```bash
 cd ~
-.ssh
 chmod 700 .ssh
 chmod 600 .ssh/authorized_keys # only owner can read and write `authorized_keys` file
 chmod 600 .ssh/id_rsa # only owner can read and write private keys 
 ```
 If you want to learn more about permissions continue below.
 
-In a machine like ubuntu we have three permission classes:
+In a machine like ubuntu we have three permission classes (plus a shorthand for all of them):
 
 1. Owner (User) - `u`
 2. Group - `g`
 3. Others - `o`
-4. All - `a` = `ugo`
+4. All - `a` = `ugo` (shorthand, not a separate class)
 
 # Numeric (Octal) File Permissions
 
@@ -138,14 +139,15 @@ chmod u=rwx,go= my-script.sh
 ```
 
 Let's break down the command above, the letters `u`, `g`, and `o` are the
-`Owner/User`, `Group` and `Others`, while the `r`, `w`, and `x` is the read,
-write, and execute permissions. we use the `=` to set certain permission, and
-we use the `,` if we want to selectively set permissions to different differently.
+`Owner/User`, `Group` and `Others`, while the `r`, `w`, and `x` are the read,
+write, and execute permissions. We use the `=` to set certain permissions (an empty value like `go=` removes all permissions), and
+we use the `,` if we want to set permissions for different classes differently.
 
 ### Adding Permission to Everyone Using Letters
 
 The `chmod +x` will add execute permission for `Owner/User`, `Group` and
-`Others` to the file or directory, it's the same as `chmod a+x file`
+`Others` to the file or directory, it's almost the same as `chmod a+x file`
+(the difference: without a class letter, bits that are masked by your `umask` are not added).
 
 ### Adding Permission Selectively Using Letters
 
@@ -153,46 +155,46 @@ The `chmod +x` will add execute permission for `Owner/User`, `Group` and
 - `chmod g+x file` - Add execute for group
 - `chmod o+x file` - Add execute for others
 
-# Key Premission `0664`
+# Key Permission `0664`
 
 ### 1. Go to your `.ssh` folder.
 
-    ```bash
-    cd /home/$USER/.ssh
-    ```
+```bash
+cd /home/$USER/.ssh
+```
 
 ### 2. Check the permission of the private key.
 
-    ```bash
-    ls -l id_rsa
-    ```
+```bash
+ls -l id_rsa
+```
 
-    Output:
+Output:
 
-    ```bash
-    -rw-rw-r-- 1 your_username your_username 1234 Oct 30 12:34 id_rsa
-    ```
+```bash
+-rw-rw-r-- 1 your_username your_username 1234 Oct 30 12:34 id_rsa
+```
 
-    The permissions `rw-rw-r--` in the above example are too open (664). To fix this, you should make the file readable and writable only by the owner and not accessible by others.
+The permissions `rw-rw-r--` in the above example are too open (664). To fix this, you should make the file readable and writable only by the owner and not accessible by others.
 
 ### 3. Change the permission to the private key
 
-    ```bash
-    chmod 600 id_rsa
-    ```
+```bash
+chmod 600 id_rsa
+```
 
-    This command sets the file permissions to 600, which means it is readable and writable only by the owner.
+This command sets the file permissions to 600, which means it is readable and writable only by the owner.
 
 ### 4. Verify that the permissions have been updated correctly:
 
-    ```bash
-    ls -l id_rsa
-    ```
+```bash
+ls -l id_rsa
+```
 
-    Output:
+Output:
 
-    ```bash
-    -rw------- 1 your_username your_username 1234 Oct 30 12:34 id_rsa
-    ```
+```bash
+-rw------- 1 your_username your_username 1234 Oct 30 12:34 id_rsa
+```
 
-    The permissions are now correct, and your private key is no longer accessible by others.
+The permissions are now correct, and your private key is no longer accessible by others.

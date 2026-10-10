@@ -32,17 +32,17 @@ A package **must contain at least one crate**, whether that’s a library or bin
 
 ## Cargo Packages
 
-We can create a package after we run cargo new.
+Running `cargo new` creates a package.
 
 There’s also a `src` directory that contains `main.rs`. Open `Cargo.toml` in your text editor, and note there’s no mention of `src/main.rs`.
 
 ### Binary Crate
 
-The `src/main.rs` is the **crate root** of a **binary crate**, this is how the toml file will look like it it was declared explicitly.
+The `src/main.rs` is the **crate root** of a **binary crate**, this is how the toml file would look if it was declared explicitly.
 
 **if written explicitly:**
 
-_keep in mind that you don't need to make write your toml file like this explicitly, since this is already the default._
+_keep in mind that you don't need to write your toml file like this explicitly, since this is already the default._
 
 ```toml
 [package]
@@ -52,7 +52,7 @@ edition = "2018"
 
 [[bin]]
 name = "hallo"
-src = "src/main.rs"
+path = "src/main.rs"
 ```
 
 ### Library Crate
@@ -93,6 +93,6 @@ name = "hallo"
 path = "src/lib.rs"
 ```
 
-### Multiple Binary Crate
+### Multiple Binary Crates
 
 A package **can have multiple binary crates** by placing files in the `src/bin` directory: each file will be a separate binary crate.

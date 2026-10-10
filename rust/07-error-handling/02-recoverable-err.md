@@ -55,11 +55,11 @@ The variant we want to use is `ErrorKind::NotFound`, which indicates the file we
 
 If we matched to `ErrorKind::NotFound` we will try to create a new file with `File::create("hello.txt")`, this function will return another `Result<std::fs::File, std::io::Error>` so we again nested another match expression to get the variants of this return type.
 
-If we din't matched to `ErrorKing::NotFound` and instead we matched on `other_error` then we panic.
+If we didn't match `ErrorKind::NotFound` and instead we matched on `other_error` then we panic.
 
-If the inner `Result<std::fs::File, std::io::Error>` match to `Ok` variant then we return the `File` contained in the `Ok()`, If on `Err` we panic.
+If the inner `Result<std::fs::File, std::io::Error>` matches the `Ok` variant then we return the `File` contained in the `Ok()`, if it's `Err` we panic.
 
-In this code we nested three (3) match expression.
+In this code we nested three (3) match expressions.
 
 ```rust
 use std::fs::File;
@@ -173,7 +173,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
 # A Shortcut for Propagating Errors: the `?` Operator
 
-This code implements a shorcut for the example above, it offers the same functionality but a more concise code.
+This code implements a shortcut for the example above, it offers the same functionality but a more concise code.
 
 ```rust
 use std::fs::File;
@@ -201,7 +201,7 @@ When the **`?` operator** calls the **`from` function**, the error type received
 
 # Chaining `?` Operator
 
-We could **even shorten the previous example code** above further by chaining method calls immediately after the `?` operator call, The functionality is again the same,this is just a different, more ergonomic way to write it.
+We could **even shorten the previous example code** above further by chaining method calls immediately after the `?` operator call, The functionality is again the same, this is just a different, more ergonomic way to write it.
 ```rust
 use std::fs::File;
 use std::io::{self, Read};

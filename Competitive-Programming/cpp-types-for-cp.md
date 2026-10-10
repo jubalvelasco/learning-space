@@ -44,7 +44,7 @@
   Tip: use `lower_bound` + `--it` to get predecessor (if any).
 
 * **`std::multiset<T>`** — like `set` but allows duplicates.
-  Use: multisets of values (e.g., frees times), erase by iterator.
+  Use: multisets of values (e.g., free times), erase by iterator.
   Tip: `erase(value)` removes *all* equal elements — use `find`/`erase(it)` to remove one.
 
 * **`std::map<K,V>`** — ordered associative map (key→value).
@@ -81,7 +81,7 @@
 * **`std::queue<T>`** — FIFO queue (BFS).
 
 * **`std::stack<T>`** — LIFO stack (DFS iterative).
-  (Both are adapters typically backed by `deque`/`vector`.)
+  (Both are container adapters backed by `std::deque` by default; `stack` can also use `vector`.)
 
 * **Heap algorithms**: `std::make_heap`, `std::push_heap`, `std::pop_heap` — alternative manual heap ops on a `vector`.
 
@@ -91,7 +91,7 @@
 
 * **`std::pair<T1,T2>`** — simple 2-tuple; sorts lexicographically.
   Use: (value, index), intervals `(start,end)`.
-  Tip: structured bindings `(a,b) = p` in C++17.
+  Tip: structured bindings `auto [a, b] = p;` in C++17.
 
 * **`std::tuple<Ts...>`** — general fixed-size heterogeneous tuple.
   Use: multi-key sorts, returning multiple values.
@@ -122,7 +122,7 @@
 * **`std::chrono::steady_clock` / durations** — microbenchmarking local runs.
 * **I/O streams**: `std::iostream`, `std::ostringstream`, `std::stringstream` — for formatting (rare on judge).
 * **`std::reference_wrapper<T>`** — store references in containers (rare).
-* **`std::function_ref`** not std (skip).
+* **`std::function_ref`** — only added in C++26, not available on most judges (skip).
 
 ---
 
@@ -130,9 +130,9 @@
 
 * **`std::mt19937`, `std::mt19937_64`** — high-quality RNG engines.
   Use: randomized tests, randomized algorithms.
-  Tip: seed with `std::random_device()` or fixed seed for repeatability.
+  Tip: seed with `std::random_device{}()` (or `chrono::steady_clock::now().time_since_epoch().count()`) or a fixed seed for repeatability.
 
-* **`std::uniform_int_distribution`, std::uniform_real_distribution`** — mapping RNG to ranges.
+* **`std::uniform_int_distribution`, `std::uniform_real_distribution`** — mapping RNG to ranges.
 
 ---
 

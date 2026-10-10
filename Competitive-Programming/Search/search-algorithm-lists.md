@@ -4,4 +4,4 @@
 - Breadth First Search
 - Dijkstra's Algorithm
 - A* Algorithm
-- Flood Fill Algorithm (Optimistic Search)
+- Flood Fill Algorithm (usually implemented with DFS or BFS)

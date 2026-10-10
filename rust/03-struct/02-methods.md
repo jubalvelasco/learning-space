@@ -42,7 +42,7 @@ fn main() {
 
 # Method's First Parameter
 
-In the **signature** for `area`, we use **`&self` instead of rectangle: &Rectangle.
+In the **signature** for `area`, we use **`&self`** instead of `rectangle: &Rectangle`.
 
 The **`&self`** is actually **short for** **`self: &Self`**.
 

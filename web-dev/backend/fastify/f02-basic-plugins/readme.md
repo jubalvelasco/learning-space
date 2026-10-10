@@ -1,5 +1,5 @@
-## Fastfy FormBody
-Enables parsing contents from static html like for example; when submit form data.
+## Fastify FormBody
+Enables parsing `application/x-www-form-urlencoded` request bodies, which is what a plain HTML `<form>` sends when it is submitted (the parsed data is available in `request.body`).
 
 - **Install**
     ```
@@ -32,14 +32,15 @@ Enables serving static files, like html, css, and javascript to clients.
     const path = require('path');
 
     // register the fastify static plugin.
-    // this also sets a root path where,
-    // all the static files is located
+    // this also sets a root path where
+    // all the static files are located
     fastify.register(fastifyStatic, {
       root: path.join(__dirname, '/static-folder')
     });
 
     // serve the file to the clients
+    // (the 2nd parameter is fastify's `reply` object, named `res` here)
     fastify.get('/', (req,res)=>{
-      res.sendFile('static-form.html');
+      return res.sendFile('static-form.html'); // path is relative to `root`
     });
     ```

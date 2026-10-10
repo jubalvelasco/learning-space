@@ -14,15 +14,15 @@ An administrator is generally a person who is in charge of installing and runnin
 postgres=# \l
 ```
 
-## Connecting to Tables
+## Connecting to a Database
 
 ```bash
-postgres=# \c <table-name>
+postgres=# \c <database-name>
 ```
 
 ## Listing Tables in the Database
 
 ```bash
-table-name=# \dt
+database-name=# \dt
 ```
 

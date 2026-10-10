@@ -337,7 +337,7 @@ $$
 m = \dfrac{l + r}{2}
 $$
 
-Let us get rid of the divisor on the left hand side first.
+Let us get rid of the divisor on the right hand side first.
 
 $$
 2m = l + r
@@ -388,7 +388,7 @@ m &= l + \dfrac{r - l}{2}
 \end{align}
 $$
 
-Now the final form of this equation is way less susceptible to overflows.
+Now the final form of this equation is way less susceptible to overflows (assuming $0 \le l \le r$, which is the case for array indices in binary search, $r - l$ can never exceed $r$, so no intermediate value is larger than the inputs).
 
 ## Completing the Square
 
@@ -414,7 +414,7 @@ ax^2 + bx &= -c
 \end{align}
 $$
 
-Divide both sides by $a$ to normalize the leading coefficient:
+Divide both sides by $a$ to normalize the leading coefficient ($a \neq 0$, otherwise it is not a quadratic):
 
 $$
 \begin{align}
@@ -498,7 +498,7 @@ $$
 \end{align}
 $$
 
-Finally, take the square root of both sides:
+Finally, take the square root of both sides (normally this needs a $\pm$, but we only keep the positive root here because $v$ is a speed, which cannot be negative):
 
 $$
 \begin{align}

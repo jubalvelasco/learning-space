@@ -6,11 +6,11 @@
 
 **mouse_DownClick()**
 
-  -takes two integer argument for the X and Y coordinate in your screen, then clicks and hold the mouse right click in that area
+  -takes two integer arguments for the X and Y coordinate in your screen, then clicks and holds the mouse right click in that area
 
 **mouse_UPClick()**
 
-  -takes two integer argument for the X and Y coordinate in your screen, and release the mouse right click in that area
+  -takes two integer arguments for the X and Y coordinate in your screen, and releases the mouse right click in that area
 
 **virtual_key_press()**
 
@@ -18,4 +18,4 @@
 
 **auto_type()**
 
-  -take a string argument to be typed virtually by the computer
+  -takes a string argument to be typed virtually by the computer

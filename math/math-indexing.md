@@ -16,7 +16,7 @@ $$idx^{1D}_{2D} = (J \cdot i) + j$$
 
 Think of it this way: to reach row $i$, you must skip over $i$ complete rows, each of which contains $J$ elements. Then you move $j$ steps into that row.
 
-For a **3D array** with $J$ columns and $K$ layers (depth), we first compute the 2D index and then scale by $K$:
+For a **3D array** with dimensions $I \times J \times K$ (indices $i$, $j$, $k$, where $K$ is the size of the last/innermost dimension), we first compute the 2D index and then scale by $K$:
 
 $$idx^{1D}_{3D} = (K \cdot ((J \cdot i) + j)) + k$$
 
@@ -30,7 +30,7 @@ This recursive pattern is generalized: each new dimension multiplies the accumul
 
 ### Definitions
 
-The matrices here are assumed to be in **Row Major Order**, meaning elements are stored row by row — the last row element of row $i$ is immediately followed by the first element of row $i+1$ in memory. This is the default in languages like C, Python (NumPy), and most others.
+The matrices here are assumed to be in **Row Major Order**, meaning elements are stored row by row — the last element of row $i$ is immediately followed by the first element of row $i+1$ in memory. This is the default in languages like C, C++, Python (NumPy), and many others. (Fortran, MATLAB, Julia and R use **Column Major Order** instead, where the formula becomes $j \cdot h + i$.)
 
 - $A$ = the underlying 1D array in memory.
 - $M$ = the matrix (2D view of the array).
@@ -55,8 +55,9 @@ These constraints ensure that every traversal stays within the valid bounds of t
 
 - $0 \leq i < h$ — the row index must be within the matrix height.
 - $0 \leq j < w$ — the column index must be within the matrix width.
-- $n + i < h$ **or** $n + j < w$ — moving forward by $n$ steps must not exceed the matrix dimensions.
-- $n - i \leq 0$ **or** $n - j \leq 0$ — moving backward by $n$ steps must not go before the start.
+- $i + n < h$ when moving down, and $j + n < w$ when moving right — moving forward by $n$ steps must not exceed the matrix dimensions.
+- $i - n \geq 0$ when moving up, and $j - n \geq 0$ when moving left — moving backward by $n$ steps must not go before the start.
+- diagonal moves must satisfy both the row and the column condition.
 
 ---
 
@@ -154,7 +155,7 @@ Diagonal traversal combines both a row shift and a column shift simultaneously. 
 
 ### **Up-Left Traversal**
 
-Moving up-left decreases both $i$ and $j$, so we subtract $w$ for the row shift and subtract $n$ for the column shift. The combined offset is $-(n \cdot w) - n$.
+Moving up-left decreases both $i$ and $j$, so we subtract $n \cdot w$ for the row shift and subtract $n$ for the column shift. The combined offset is $-(n \cdot w) - n$.
 
 - **by 1 cell**
 
@@ -182,7 +183,7 @@ Moving down-right increases both $i$ and $j$, so both offsets are positive. The 
 
 ### **Up-Right Traversal**
 
-Moving up-right decreases $i$ (subtracting $w$ per row) but increases $j$ (adding $n$), giving a net offset of $-(n \cdot w) + n$.
+Moving up-right decreases $i$ (subtracting $w$ per row, so $n \cdot w$ in total) but increases $j$ (adding $n$), giving a net offset of $-(n \cdot w) + n$.
 
 - **by 1 cell**
 

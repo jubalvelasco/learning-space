@@ -4,8 +4,8 @@
 |:-----------------------------------------------------------------------------------------------------------|:------------------------------------------------------|:------------------|
 | Story-based problem, no math trick visible, just apply rules step by step                                  | Simulation                                            | Beginner          |
 | Count how many times each value appears, then use those counts to answer queries                           | Hash map / frequency array                            | Beginner          |
-| Given an array, answer multiple "sum of elements from index l to r" queries                                | Prefix sums, sliding window                           | Beginner          |
-| Find a contiguous subarray whose sum equals k, or maximize/minimize a subarray sum                        | Prefix sums, sliding window, Kadane's                 | Beginner          |
+| Given an array, answer multiple "sum of elements from index l to r" queries                                | Prefix sums                                           | Beginner          |
+| Find a contiguous subarray whose sum equals k, or maximize/minimize a subarray sum                        | Prefix sums + hash map, sliding window (only if all values are non-negative), Kadane's (max/min sum) | Beginner          |
 | Check if a string reads the same forwards and backwards, or find palindromic substrings                   | Two pointers, hashing                                 | Beginner          |
 | Input is already sorted, or sorting it first makes the problem obviously easier                            | Binary search, two pointers                           | Beginner          |
 | "Rearrange/reorder elements to satisfy a condition" — order doesn't matter, just pick the best arrangement | Sorting + greedy                                      | Beginner          |
@@ -32,7 +32,7 @@
 | For each element, find the nearest element to its left or right that is greater or smaller than it        | Monotonic stack                                       | Medium            |
 | Count ways to choose k items from n, or compute combinations C(n,k) possibly under modulo                | Pascal's triangle, combinatorics with modular inverse | Medium            |
 | Tasks have prerequisites, find a valid order to complete all tasks without violating dependencies          | Topological sort (Kahn's / DFS)                       | Medium            |
-| Edges have different weights, find shortest path from source to all nodes (all weights positive)           | Dijkstra (positive weights), BFS (unweighted)         | Medium            |
+| Edges have different weights, find shortest path from source to all nodes (all weights non-negative)       | Dijkstra (non-negative weights), BFS (unweighted)     | Medium            |
 | Values can be up to 10^9 but only a few thousand distinct values exist — need to index or map them        | Coordinate compression                                | Medium            |
 | Same range query (sum, min, max) asked many times on a fixed unchanging array                             | Prefix sums, sparse table, segment tree               | Medium-Hard       |
 | Array changes (single element updates) AND range queries both happen in the same problem                  | Fenwick tree (BIT), segment tree                      | Medium-Hard       |
@@ -43,7 +43,7 @@
 | Given a set of strings, answer queries about common prefixes or check if a word exists in a dictionary    | Trie                                                  | Medium-Hard       |
 | n ≤ 20 and problem needs you to try all combinations of elements (include/exclude each)                   | Bitmask DP or brute force                             | Hard              |
 | n ≤ 40, brute force is too slow but splitting into two halves and combining results is feasible            | Meet in the middle                                    | Hard              |
-| Array has both range updates (add to [l,r]) AND range queries (sum/min/max of [l,r]) interleaved          | Segment tree with lazy propagation, BIT               | Hard              |
+| Array has both range updates (add to [l,r]) AND range queries (sum/min/max of [l,r]) interleaved          | Segment tree with lazy propagation, or two BITs (range add + range sum only, not min/max) | Hard              |
 | Tree problem with queries asking about sums, max, or distances along paths or within subtrees             | DFS, tree DP, LCA                                     | Hard              |
 | Two players play a game optimally, determine who wins — problem has clear states and move rules           | Game theory, Sprague-Grundy, Nim                      | Hard              |
 | DP has a recurrence like f(n) = f(n-1) + f(n-2) but n is up to 10^18, too large to iterate              | Matrix exponentiation                                 | Very Hard         |

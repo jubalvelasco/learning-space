@@ -11,10 +11,10 @@ A path can take two forms:
 - A **relative path** starts from the current module and uses `self`, `super`, or an identifier in the current module.
 Both absolute and relative paths are followed by one or more identifiers separated by double colons (`::`).
 
-So by playing on these rules... on a create, we can actually access the functions and other types declared in the `main.rs` or `lib.rs` using the `crate` and the `super` keyword (_but there is really no good reason to do this_):
+So by playing on these rules... in a crate, we can actually access the functions and other types declared in the `main.rs` or `lib.rs` (the crate root) using the `crate` and the `self` keywords (_but there is really no good reason to do this_):
 
 > [!NOTE]  
-> This indeed work exactly like the files system; `./target.file` for the relative path or using an absolute path `~/Your/Path/target.file`.
+> This indeed works like a file system; `./target.file` for the relative path or using an absolute path `/Your/Path/target.file`.
 
 ```rust
 fn main() {

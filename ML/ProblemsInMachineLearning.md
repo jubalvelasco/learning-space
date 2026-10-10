@@ -1,18 +1,18 @@
 # Problems In Machine Learning
 
-- **Regression** - Predicting **numerical values** e.g. house price predition
+- **Regression** - Predicting **numerical values** e.g. house price prediction
 - **Classification** - Predicting the category of input data.
   - **Binary Classification** on/off, yes/no, etc.
-  - **Multi-Nomial Classification** Multiple percentage output per class.
+  - **Multi-Class (Multinomial) Classification** - predicting one of more than two classes (models usually output a probability per class, e.g. with softmax).
 - **Clustering** - Categorizes the data into groups. 
 - **Time-series forecasting** - 
 - **Anomaly detection** - Finding outliers or unexpected data. (IsolationForest, Minimum covariance determinant, Local outlier factor, One-class SVM, GAN (detection part))
 - **Ranking** - (Bipartite Ranking)
 - **Recommendation**
 - **Data generation** - GAN (generator part)
-- **Optimization** - Genetic Programming, Backpropagation?
+- **Optimization** - Genetic Programming / Genetic Algorithms (note: backpropagation is not a problem type, it is the algorithm used to compute gradients when training neural networks with gradient descent)
 
-## Unanswer questions
+## Unanswered questions
 
 - what is a time series & times series data
 - meaning of the word regression

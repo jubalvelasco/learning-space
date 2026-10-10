@@ -12,7 +12,7 @@
 
 ## We call the action of creating a reference borrowing.
 
-The `&` operator just like in C++ will take the reference of a variable. Rust also have a dereferencing operator `*`. (similar to C++ when dereferencing another pointer or iterator).
+The `&` operator just like in C++ will take the reference of a variable. Rust also has a dereferencing operator `*`. (similar to C++ when dereferencing another pointer or iterator).
 
 These ampersands `&` represent references, and they **allow** you to refer to some value **without taking ownership** of it.
 
@@ -25,7 +25,8 @@ let foo = &bar;
 
 ### **Creating Mutable References**
 ```rust
-let mut foo = &mut bar;
+let mut bar = Bar::new(); // the borrowed variable itself must be declared `mut`
+let foo = &mut bar;       // `foo` itself does not need `mut` to modify `bar` through it
 ```
 
 ### **Passing Immutable to Immutable**
@@ -111,7 +112,7 @@ let r2 = &mut s;
 println!("{r2}");
 ```
 
-# Dangling Pointers
+# Dangling References
 
 This code tries to create a dangling reference but it will fail to compile.
 
@@ -125,7 +126,7 @@ fn dangle() -> &String {
 
     // returns only the reference of "s", but since it's
     // just a reference, when "s" goes out of the function 
-    // scope, it's heap-allocated memory will be freed
+    // scope, its heap-allocated memory will be freed
     // when the `drop` method is called, this should cause
     // a dangling reference.
     

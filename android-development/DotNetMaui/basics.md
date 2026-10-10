@@ -26,10 +26,10 @@
         <ShellContent
             Title="Home"
             ContentTemplate="{DataTemplate local:MainPage}"
-            Route="MainPage>
+            Route="MainPage" />
         ```
 
-        The xaml file renders the `MainPage` as show above.
+        The xaml file renders the `MainPage` as shown above.
 
     - `AppShell.xaml.cs` -> defines `AppShell` class and inherits `Shell` class:
 
@@ -43,7 +43,7 @@
             }
             ```
 
-    - Each page should register to `AppShell` no matter what the heirarchy and sequence order because `AppShell` provides url based navigation later on.
+    - Pages that are part of the Shell visual hierarchy (declared with `ShellContent` in `AppShell.xaml`) are registered automatically through their `Route`. Every other page you want to navigate to must be registered with `Routing.RegisterRoute` (see below), because `AppShell` provides the url based navigation.
 
 - `App.xaml` -> contains:
 
@@ -60,6 +60,12 @@
                     MainPage = new AppShell();
                 }
             }
+            ```
+
+        - NOTE: in .NET 9+ setting `MainPage` is deprecated, override `CreateWindow` instead:
+            ```csharp
+            protected override Window CreateWindow(IActivationState? activationState)
+                => new Window(new AppShell());
             ```
 
 - `MauiProgram.cs` - Starting point for cross-platform development, uses the `App` class to build the app.
@@ -81,7 +87,7 @@
         }
         ```
 
-- **Platforms** - folder containing the starting point of programs for each specific platforms.
+- **Platforms** - folder containing the starting point of the program for each specific platform.
     - Each platform runs `MauiProgram.cs`'s `CreateMauiApp()`
 
         ```csharp
@@ -149,10 +155,10 @@ ACTOR --> VIEW
 
 - **State** is the data in a page class
 - **View** is an element or layout of a page, or a page itself.
-    - `.xaml` files represents the **UI**
-    - `.xaml.cs` defined the **UI Logic**
+    - `.xaml` files represent the **UI**
+    - `.xaml.cs` files define the **UI Logic** (code-behind)
     - There are many types of Views like View UI Elements and View Layouts which can be nested together.
-    - In a **Page** (`<ContentPage>`) there should only be one **Parent View Layout**
+    - In a **Page** (`<ContentPage>`) there should only be one **Parent View Layout** (the `Content` property holds a single view, so put the other views inside a layout)
 
 ## Architecture - MVVM Development
 
@@ -166,7 +172,7 @@ In Visual Studio you can do the following to create new pages with the right nam
 
 2. _Right Click New Folder_ > `Add` > `New Item` > `.NET MAUI Content Page (XAML)` > _Input Page Name_
 
-In VS Code in ubuntu development, you might need to fix the namespace of the `.xaml.cs` files of the newly created page inside new folders, because by default it can only create pages in the local namespace.
+In VS Code in ubuntu development, you might need to fix the namespace of the `.xaml.cs` files (and the `x:Class` attribute in the `.xaml` file) of the newly created page inside new folders, because by default it can only create pages in the local namespace.
 
 ## URL Navigation - Register New Pages
 
@@ -233,28 +239,27 @@ From **NewMainPage.xaml**
 <Button
     Text="btnTxt"
     x:Name="btnName"
-    Clicked="btnEHandlerFuncName">
+    Clicked="btnEHandlerFuncName" />
 ```
 
 From **NewMainPage.xaml.cs**
 
 ```cs
-private void btnEHandlerFuncName(object sender, EventArgs e)
+private async void btnEHandlerFuncName(object sender, EventArgs e)
 {
     // in order for this to work the page should be registered in the AppShell
-    Shell.Current.GoToAsync(
-        nameof(OtherPage),
-        typeof(OtherPage)
-    );
+    // (the string must match the route name used in Routing.RegisterRoute)
+    await Shell.Current.GoToAsync(nameof(OtherPage));
 }
 ```
 
 ## URL Navigation - Go Back To Parent Page
 
 ```cs
-Shell.Current.GoToAsync("..");
+// go back one page (pop the navigation stack)
+await Shell.Current.GoToAsync("..");
 
-// or
-
-Shell.Current.GoToAsync($"//{nameof(NewMainPage)}");
+// or, go to an absolute route (`//` + the Route of a ShellContent in AppShell.xaml),
+// this resets the navigation stack
+await Shell.Current.GoToAsync($"//{nameof(NewMainPage)}");
 ```

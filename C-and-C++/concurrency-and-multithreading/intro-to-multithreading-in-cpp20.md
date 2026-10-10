@@ -14,12 +14,15 @@ $$
 
 ## **Built-in parallel algorithms** 
 
-Some standard C++ algorithm have built-in parallel version,
+Since C++17, many standard C++ algorithms have a built-in parallel version (execution policies),
 use them if there is one for that specific algorithm.
 
 ex:
 
 ```c++
+#include <algorithm>
+#include <execution> // with GCC/libstdc++ you also need to link Intel TBB (-ltbb)
+
 std::vector<MyData> data = { ... };
 std::sort(
     std::execution::par,
@@ -28,6 +31,7 @@ std::sort(
 );
 ```
 
-Only use this on appropriate times, like in the example above
-if we have a trillion `MyData` elements then it's better to
-use the parallel version of `std::sort`.
+Only use this at appropriate times, like in the example above
+if we have a huge number of `MyData` elements then it's better to
+use the parallel version of `std::sort` (for small inputs the overhead of
+starting and synchronizing threads makes it slower than the sequential version).

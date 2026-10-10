@@ -50,9 +50,9 @@ println!("The third element is {third}");
 
 **Access elements using `get` method**
 
-When we pass an index that is outside the size range of the vector in `get` method, it will return a  `None` Option enum variant without panicking. 
+When we pass an index that is outside the size range of the vector in `get` method, it will return a `None` Option enum variant without panicking. 
 
-The get method returns a `Option<&T>` enum if the given index is in range of the vector size.
+The get method returns an `Option<&T>`: `Some(&element)` if the given index is in range of the vector size, otherwise `None`.
 
 ```rust
 let third: Option<&i32> = v.get(2);
@@ -64,7 +64,7 @@ match third {
 
 # Iterating over the Values in a Vector
 
-To change the value that the mutable reference refers to, we have to use the `*` dereference operator to get to the value in i before we can use the `+=` operator.
+To change the value that the mutable reference refers to, we have to use the `*` dereference operator to get to the value in `i` before we can use the `+=` operator.
 
 ```rust
 let mut v = vec![100, 32, 57];

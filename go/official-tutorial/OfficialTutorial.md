@@ -6,4 +6,4 @@
 
 2. `greetings` - shows how to create a **library** module called `greetings`.
 
-3. 
+3. `hello` - shows how to create an **application** module called `hello` that uses the local `greetings` module.

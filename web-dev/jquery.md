@@ -9,10 +9,10 @@ console.log('jQuery Version :', $().jquery);
 ## Selecting Elements
 
 ```js
-// selects the whole html document
-let WholeHTMLdocument = $("document");
-// or
+// selects the whole html document (pass the `document` object, not a string)
 let WholeHTMLdocument = $(document);
+
+// NOTE: $("document") is a CSS selector for <document> tags, which don't exist, so it matches nothing
 
 // selects an html element using css selector syntax
 let htmlElement = $("css-selector");
@@ -33,7 +33,7 @@ $("css-selector").parent()
 
 ## DOM Ready Event
 
-Event handler that fires when the whole html document finised loading.
+Event handler that fires when the HTML document has been fully parsed and the DOM is ready to be used (like `DOMContentLoaded`). It does **not** wait for images, stylesheets and other resources to finish loading; use `$(window).on("load", handler)` for that.
 
 ```js
 $( handler ) // recommended for jQuery 3.0
@@ -94,11 +94,19 @@ $("p").text("new text content");    // set
 Remember that setting contents is applicable to all tag/elements
 in html but always remember that there are some elements that will
 not display the text or inner html content between the opening
-tag (`<>`) and closing (`</>`) html tags like `<input>`.
+tag (`<>`) and closing (`</>`) html tags like `<input>` (it's a void element, it has no closing tag or content, use `.val()` instead).
 
 ## Set/Update Values Of Inputs
 
+```js
+$("input#name").val("new value"); // set the value of an <input>, <select> or <textarea>
+```
+
 ## Get Values From Inputs
+
+```js
+let value = $("input#name").val(); // get the value of the first matched element
+```
 
 ## Adding Elements (parses HTML)
 
@@ -132,7 +140,7 @@ $("p").wrap("<div class='className' otherHtmlAttr='value'>");
 
 ## Hiding/Showing Elements
 
-Most of these method has overloads where you can pass an
+Most of these methods have overloads where you can pass an
 argument like **duration** (how fast the animation will execute), type of **easing**, and **event handlers**.
 
 ```js
@@ -149,7 +157,7 @@ $("css-selector").fadeOut(); // hide
 $("css-selector").fadeToggle(); // hide if shown and show if hidden
 ```
 
-The hide methods above will set the dislay of an html element to:
+The hide methods above will set the display of an html element to (after the animation finishes):
 
 ```css
 display: none

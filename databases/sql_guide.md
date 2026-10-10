@@ -34,15 +34,15 @@ Query OK, 1 row affected (0.01 sec)
 
 * Choose `utf8mb4` for full Unicode in MySQL/MariaDB. Collation controls case-sensitivity and sort order.
 
-* SQLite stores everything in a file; concurrent writers are limited unless using WAL mode (see Concurrency section).
+* SQLite stores everything in a file and allows only **one writer at a time** (even in WAL mode); WAL mode lets readers keep reading while a write is in progress (see Concurrency section).
 
 * **Permissions & privileges:** Creating a database usually requires `CREATE` or admin-level privileges. App accounts should have the minimum required rights (e.g., `INSERT/SELECT/UPDATE/DELETE` on specific schemas) rather than global privileges.
 
-* **Storage engines (MySQL/MariaDB):** Explain briefly InnoDB (transactional, row-level locks, supports FKs) vs MyISAM (non-transactional, table-level locking). Prefer InnoDB for modern apps.
+* **Storage engines (MySQL/MariaDB):** InnoDB (transactional, row-level locks, supports FKs, the default) vs MyISAM (non-transactional, table-level locking, no FKs). Prefer InnoDB for modern apps.
 
 * **Collation effects:** Sorting, uniqueness checks, and `GROUP BY` behavior are affected by collation - a case-insensitive collation (`_ci`) treats `A` = `a`.
 
-* **SQLite file-level considerations:** File locking, OS-level backups, and permissions matter. If multiple processes write concurrently, use WAL (`PRAGMA journal_mode = WAL`) to reduce writer contention.
+* **SQLite file-level considerations:** File locking, OS-level backups, and permissions matter. If multiple processes access the file concurrently, use WAL (`PRAGMA journal_mode = WAL`) so readers don't block the writer and the writer doesn't block readers (writes are still serialized; set a `busy_timeout` so writers wait instead of failing immediately).
 
 ---
 
@@ -68,7 +68,7 @@ Database changed
 **Details:** `USE` only exists in server engines. In SQLite, refer to `main.table` or `other_db.table` if attached.
 
 * `USE` affects only the current connection/session. Applications typically set the database in the connection string so every client connection automatically uses the right DB.
-* For cross-database queries on server engines you can use fully-qualified names: `db_name.schema_name.table_name` (schema usage depends on engine).
+* For cross-database queries on server engines you can use fully-qualified names: in MySQL/MariaDB a "database" and a "schema" are the same thing, so it's `db_name.table_name`; SQL Server uses `db_name.schema_name.table_name`; PostgreSQL uses `schema_name.table_name` and cannot query across databases directly (without extensions like `dblink`/`postgres_fdw`).
 
 ---
 
@@ -156,7 +156,7 @@ ALTER TABLE items ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
 
 * **Blocking vs online DDL:** Modern MySQL/MariaDB/InnoDB versions support many online DDL operations; others still lock tables. Always check engine/version behavior and test on staging.
 
-* **NULL vs NOT NULL:** Adding a `NOT NULL` column without a default will fail when existing rows exist. Best practice: add the column nullable, backfill data, then alter to `NOT NULL`.
+* **NULL vs NOT NULL:** Adding a `NOT NULL` column without a default fails on a non-empty table in SQLite and PostgreSQL (MySQL/MariaDB instead silently fill existing rows with the type's implicit default, e.g. `0` or `''`). Best practice: add the column nullable, backfill data, then alter to `NOT NULL`.
 
 * **Backups & migrations:** For large tables, consider creating a shadow table, copying rows in chunks, then swapping names to minimize downtime.
 
@@ -254,7 +254,7 @@ CREATE TABLE posts (
 
 * **Constraint checking behavior:** Some databases evaluate constraints at statement end vs transaction end; know your engine's semantics.
 
-* **Deferrable constraints:** While MySQL doesn't support deferrable constraints, other engines may. Teach students these differences especially if they come from or move to other RDBMS.
+* **Deferrable constraints:** MySQL/MariaDB don't support deferrable constraints (checked at the end of the transaction), but PostgreSQL and SQLite do (`DEFERRABLE INITIALLY DEFERRED`). Keep these differences in mind when moving between RDBMSs.
 
 ---
 
@@ -268,8 +268,9 @@ CREATE TABLE posts (
 CREATE INDEX idx_users_username ON users(username);
 CREATE UNIQUE INDEX ux_users_email ON users(email);
 
--- Drop an index (server engines / SQLite syntax varies)
-DROP INDEX idx_users_username;  -- MySQL/MariaDB / SQLite: DROP INDEX idx_users_username;
+-- Drop an index (syntax varies)
+DROP INDEX idx_users_username ON users;  -- MySQL/MariaDB (the table name is required)
+DROP INDEX idx_users_username;           -- SQLite / PostgreSQL
 ```
 
 **Example EXPLAIN snippet (conceptual)**
@@ -512,7 +513,7 @@ SELECT u.username, p.title
 FROM users u
 RIGHT JOIN posts p ON p.user_id = u.id;
 
--- FULL OUTER JOIN (returns rows when either side matches) - not supported directly in MySQL; emulate with UNION of LEFT and RIGHT or use databases that support FULL OUTER JOIN
+-- FULL OUTER JOIN (returns all rows from both sides, matched where possible) - not supported in MySQL/MariaDB; emulate with UNION of LEFT and RIGHT JOIN, or use databases that support it (PostgreSQL, SQL Server, SQLite 3.39+)
 SELECT u.username, p.title
 FROM users u
 FULL OUTER JOIN posts p ON p.user_id = u.id;  -- dialect-dependent
@@ -547,7 +548,7 @@ GROUP BY active;
 
 **Details:** `COUNT(column)` counts non-NULL values; `COUNT(*)` counts rows. Use `HAVING` to filter groups (e.g., `HAVING COUNT(*) > 10`).
 
-* **ONLY_FULL_GROUP_BY:** MySQL's strict mode (`ONLY_FULL_GROUP_BY`) enforces that non-aggregated columns in `SELECT` must be in `GROUP BY`. Teach enabling strict SQL modes for predictable behavior.
+* **ONLY_FULL_GROUP_BY:** MySQL's `ONLY_FULL_GROUP_BY` SQL mode (enabled by default since MySQL 5.7.5) rejects queries where non-aggregated columns in `SELECT` are not in `GROUP BY` (or functionally dependent on it). Keep it enabled for predictable behavior; without it MySQL returns an arbitrary value from the group.
 * **Aggregate performance:** Aggregations over large datasets benefit from pre-aggregated tables or indexed materialized views where supported.
 
 ---
@@ -614,7 +615,7 @@ UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = 2;
 **Pitfall:** Omitting `WHERE` updates every row.
 
 * **Optimistic concurrency:** Use version columns (e.g., `version` integer) and `WHERE version = :old` to prevent overwriting concurrent updates (check affected rows).
-* **RETURNING:** Some DBs (and newer MySQL) support `RETURNING` clauses to fetch changed rows; check version support.
+* **RETURNING:** PostgreSQL, SQLite (3.35+) and MariaDB (10.5+, for `INSERT`/`DELETE`) support `RETURNING` clauses to fetch changed rows; MySQL does **not** support `RETURNING`.
 
 ---
 
@@ -662,7 +663,7 @@ ON CONFLICT(k) DO UPDATE SET v = excluded.v;
 **Pitfall:** SQLite `INSERT OR REPLACE` deletes old row and inserts new - beware of FK cascades.
 
 * **Race conditions & atomicity:** `ON DUPLICATE KEY` / `ON CONFLICT` are atomic upserts that avoid the classic `SELECT` then `INSERT/UPDATE` race.
-* **MySQL `VALUES()` deprecation:** Newer MySQL versions prefer `INSERT ... AS new` patterns or use expressions that reference the `VALUES()` alias differently; check exact dialect for portability.
+* **MySQL `VALUES()` deprecation:** MySQL 8.0.20+ deprecates `VALUES(col)` inside `ON DUPLICATE KEY UPDATE`; use a row alias instead: `INSERT INTO kv (k,v) VALUES ('site_hits', 1) AS new ON DUPLICATE KEY UPDATE v = new.v;` (MariaDB does not support the alias syntax and still uses `VALUES(col)`).
 
 ---
 
@@ -703,7 +704,7 @@ SET autocommit = 0; -- turn off autocommit in some clients (MySQL) then COMMIT; 
 
 ### Step 2 - Isolation (server engines) and SQLite concurrency
 
-**What & why:** Isolation controls visibility of other transactions. MySQL/MariaDB offer `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`. SQLite allows many readers, single writer; use WAL for better concurrency.
+**What & why:** Isolation controls visibility of other transactions. MySQL/MariaDB offer `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ` (InnoDB default), `SERIALIZABLE`. SQLite allows many readers, single writer; use WAL for better concurrency.
 
 **SQL (set isolation)**
 
@@ -723,7 +724,7 @@ PRAGMA journal_mode = WAL;
 
 * **InnoDB behavior:** MySQL/InnoDB default `REPEATABLE READ` historically prevents some anomalies using gap locks; however, it can produce lock waits or deadlocks under contention.
 * **Deadlock handling:** Applications should detect deadlock errors (specific SQLSTATE codes) and retry transactions with backoff.
-* **SQLite WAL specifics:** WAL improves concurrency but increases disk usage and requires checkpointing; teach `PRAGMA wal_autocheckpoint` and how checkpoints work.
+* **SQLite WAL specifics:** WAL improves concurrency but increases disk usage and requires checkpointing (copying the WAL file content back into the main DB file); this happens automatically, controlled by `PRAGMA wal_autocheckpoint` (default every 1000 pages), or manually with `PRAGMA wal_checkpoint`.
 
 ---
 
@@ -829,7 +830,7 @@ SELECT rowid, * FROM posts_fts WHERE posts_fts MATCH 'search';
 
 **Commands (conceptual)**
 
-* MySQL/MariaDB: `mysqldump --databases app_db > dump.sql` (logical dump) or physical backups (Percona/XtraBackup).
+* MySQL/MariaDB: `mysqldump --single-transaction --databases app_db > dump.sql` (logical dump; `--single-transaction` gives a consistent snapshot of InnoDB tables without locking them) or physical backups (Percona XtraBackup / MariaDB Backup).
 
 * SQLite: copy the DB file or use `sqlite3 db.sqlite ".backup backup.sqlite"` / backup API.
 
@@ -849,7 +850,7 @@ SELECT rowid, * FROM posts_fts WHERE posts_fts MATCH 'search';
 VACUUM;
 ```
 
-* `VACUUM` can be slow and requires as much free space as the DB size; schedule during maintenance windows.
+* `VACUUM` can be slow and may need up to twice the DB size of free disk space (it builds a temporary copy); schedule during maintenance windows.
 * For MySQL, `OPTIMIZE TABLE` can be used to defragment and rebuild tables (behavior depends on engine).
 
 ---

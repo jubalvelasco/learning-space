@@ -70,7 +70,7 @@ scores.insert(String::from("Blue"), 25);
 
 # Just a Little Refresher in Borrowing and References
 
-#### Why does this code compiles?
+#### Why does this code compile?
 
 ```rust
 let mut scores = HashMap::new();

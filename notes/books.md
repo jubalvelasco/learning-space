@@ -2,7 +2,7 @@
 
 ## Programming Languages
 
-- **Compilers: principles, techniques, and tools** - go to book when studying about compilers
+- **Compilers: Principles, Techniques, and Tools** (a.k.a. "the Dragon Book") - go-to book when studying compilers
 
 ## Software Engineering
 
@@ -12,17 +12,17 @@
 
 3. **Game Programming Patterns** (It also has an online version here: [Game Programming Patterns](https://gameprogrammingpatterns.com/introduction.html)) - _This book also explores design patterns in book #1, but is applied to game development._
 
-4. **Clean Code** (Robert C. Martin | Uncle Bob) - _About the SOLID principles._
+4. **Clean Code** (Robert C. Martin | Uncle Bob) - _About writing readable and maintainable code (naming, functions, comments, formatting, error handling, unit tests). The SOLID principles are covered more in depth in his other books, e.g. "Agile Software Development, Principles, Patterns, and Practices" and Clean Architecture (#6)._
 
-5. **Clean Coder** (Robert C. Martin | Uncle Bob) - _A code of conduct book to adhere to when practicing/implementing Clean Code (#4)._
+5. **The Clean Coder** (Robert C. Martin | Uncle Bob) - _A code of conduct book about professionalism to adhere to when practicing/implementing Clean Code (#4)._
 
-6. **Clean Architecture** (Robert C. Martin | Uncle Bob) - _About software architecture with a focus on Clean Code (#4)._
+6. **Clean Architecture** (Robert C. Martin | Uncle Bob) - _About software architecture (including the SOLID principles applied at the architecture level)._
 
 7. **SFML Game Development** - _Game development with a slightly older version of C++, but the concepts can still be applied to modern C++._
 
 ## Physics
 
-- Introduction to Classical Electrodynamics - Griffith
+- Introduction to Electrodynamics - David J. Griffiths
 
 ## Fiction
 
@@ -36,11 +36,12 @@
 
 1. Foundation
 2. Foundation & Empire
-3. The Second Foundation
+3. Second Foundation
 
-**Robert Langdon Adventures**
+**Robert Langdon Adventures** (in publication order)
 
-1. The Da Vinci Code
-2. Angels & Demons
-3. Inferno
-4. The Lost Symbol
+1. Angels & Demons
+2. The Da Vinci Code
+3. The Lost Symbol
+4. Inferno
+5. Origin

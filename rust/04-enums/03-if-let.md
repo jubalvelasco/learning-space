@@ -15,11 +15,11 @@ match config_max {
 ```
 
 > [!NOTE]  
-> The `Options<T>` `enum` has only two variants, but you can use the `if let` expression even if you have an `enum` with multiple variants as long as you only want to get **one specific pattern value**.
+> The `Option<T>` `enum` has only two variants, but you can use the `if let` expression even if you have an `enum` with multiple variants as long as you only want to get **one specific pattern value**.
 
 ## Using `if let`
 
-This code is equivalent to the example code above, it just have a more shorter or concise syntax.
+This code is equivalent to the example code above, it just has a shorter, more concise syntax.
 
 ```rust
 let config_max = Some(3u8);
@@ -30,7 +30,7 @@ if let Some(max) = config_max {
 
 ## Using `if let` with `else`
 
-In the second example above we only want to run a block of code if our choosen single pattern match the expression, but using `if let else` will enable us to run another block of code if it didn't match the signle pattern that we wanted to match with.
+In the second example above we only want to run a block of code if our chosen single pattern matches the expression, but using `if let ... else` will enable us to run another block of code if it didn't match the single pattern that we wanted to match with.
 
 ```rust
 let config_max = Some(3u8);

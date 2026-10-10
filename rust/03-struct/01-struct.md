@@ -147,7 +147,7 @@ fn main() {
 
 # Ownership of Struct Data
 
-In the User struct definition in the [very fist example](#defining-structs), we used the `String` type rather than the `&str` **string slice type**. This is a deliberate choice because we want each instance of this struct to own all of its data and for that data to be valid for as long as the entire struct is valid.
+In the User struct definition in the [very first example](#defining-structs), we used the `String` type rather than the `&str` **string slice type**. This is a deliberate choice because we want each instance of this struct to own all of its data and for that data to be valid for as long as the entire struct is valid.
 
 **It’s also possible** for structs **to store references** to data owned by something else, **but to do so requires** the use of **lifetimes**, a Rust feature that we’ll discuss in Chapter 10.
 
@@ -196,8 +196,8 @@ fn main() {
         height: 50,
     };
 
-    println!("reac1 : format 1 = {:?}", rect1);
-    println!("reac1 : format 2 = {:#?}", rect1);
+    println!("rect1 : format 1 = {:?}", rect1);  // single line
+    println!("rect1 : format 2 = {:#?}", rect1); // pretty-printed (multi-line)
 }
 ```
 
@@ -205,8 +205,8 @@ fn main() {
 
 The `dbg!` macro is useful when debugging code
 - it will print the filename and the line number where it was called
-- it will print the code passed inside its `()`
-- it will print the equivalent value of that variable.
+- it will print the code (expression) passed inside its `()`
+- it will print the resulting value of that expression, and then return ownership of the value (so it can be used inside expressions).
 
 > [!Note]  
 > Calling the `dbg!` macro prints to the **standard error console stream (stderr)**, as opposed to `println!`, which prints to the _standard output console stream (stdout)_.
@@ -229,15 +229,23 @@ fn main() {
 }
 ```
 
-We use a reference to `rect1` in the next call. Here’s what the output of this example looks like:
+We use a reference to `rect1` in the second call (so `dbg!` doesn't take ownership of it). Here’s what the output of this example looks like:
+
+```
+[src/main.rs:10:16] 30 * scale = 60
+[src/main.rs:14:5] &rect1 = Rectangle {
+    width: 60,
+    height: 50,
+}
+```
 
 # Struct Member Access Modifiers
 
-`struct` members and methods are **public** by default on the **same module** scope it was defined.
+`struct` fields and methods are **private** by default, but private items are still accessible from **within the same module** where the struct was defined (and its child modules), which is why it looks like they are "public" there.
 
-But if you are using a `struct` that comes from a **separate module**, all of its **members** and **methods** would be **private** by **default**.
+So if you are using a `struct` that comes from a **separate module**, all of its **fields** and **methods** that are not marked `pub` are **inaccessible** (making the struct itself `pub` does not make its fields public).
 
-Meaning you wouldn't be able to [normaly initialize a struct (as show above)](#creating-instances-from-other-instances) that comes from a module, you would need to set all of its **members** first to **public** explicitly using the `pub` keyword.
+Meaning you wouldn't be able to [normally initialize a struct (as shown above)](#instantiation-of-structs) that comes from another module, you would need to set all of its **fields** first to **public** explicitly using the `pub` keyword (or provide a public constructor function, like `summer` in the example below).
 
 And to access a method of a `struct` that comes from a module  you would need to set the method to **public** using the `pub` keyword again.
 

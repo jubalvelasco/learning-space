@@ -1,6 +1,6 @@
 # Create a Node.js Fastify.js project using fastify-cli
 
-## Install Fastify CLI of not installed yet.
+## Install Fastify CLI if not installed yet.
 
 ```bash
 sudo npm install fastify-cli --global

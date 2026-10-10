@@ -6,17 +6,17 @@
 | --- | --- | --- |
 | ```ios::in \| ios::out``` | To open the file for input and output. | yes |
 | ```ios::in \| ios::out \| ios::trunc``` | Opens the file for input and output. If the file already exists, it will be truncated. | no |
-| ```ios::in \| ios::out \| ios::app``` | Opens the file for input and output. If the file does not exist, it will be created. Before each writing access, a seek to end is performed. | no |
+| ```ios::in \| ios::out \| ios::app``` | Opens the file for input and output. If the file does not exist, it will be created. Before each write, a seek to the end is performed (C++11 and later). | no |
 
 ---------
     
-## Pointers for file stream pointer or any other stream classes
+## Position pointers for file streams (or any other stream classes)
     
-- ```tellp()``` - returns a long int that tells the current position of the put pointer (write)
-- ```tellg()``` - returns a long int that tells the current position of the get pointer (read)
-- ```seekp(pos,posflag)``` - modifies the current position of the put pointer (write) [If you do not specify a positioning flag, the position will be assumed to be relative to
+- ```tellp()``` - returns a `std::streampos` (pos_type) that tells the current position of the put pointer (write)
+- ```tellg()``` - returns a `std::streampos` (pos_type) that tells the current position of the get pointer (read)
+- ```seekp(pos)``` / ```seekp(offset,posflag)``` - modifies the current position of the put pointer (write) [If you do not specify a positioning flag, the position is an absolute position, i.e. relative to
 the beginning of the file]
-- ```seekg(pos,posflag)``` - modifies the current position of the get pointer (read) [If you do not specify a positioning flag, the position will be assumed to be relative to
+- ```seekg(pos)``` / ```seekg(offset,posflag)``` - modifies the current position of the get pointer (read) [If you do not specify a positioning flag, the position is an absolute position, i.e. relative to
 the beginning of the file]
 
 ---------
@@ -34,28 +34,29 @@ the beginning of the file]
 - `ios::eofbit` - end of file reached
 - `ios::failbit` - last read or write operation failed
 - `ios::badbit` - an irrecoverable error occurred
-- `ios::goodbit` - the stream is ok, e.g. no other state flag is set.
+- `ios::goodbit` - the stream is ok, i.e. no other state flag is set (its value is `0`).
 
     
-## Method to discover current state flag, they return `true` when the corresponding flag has been raised
+## Methods to discover the current state flags
     
-- `eof()`
-- `fail()`
-- `bad()`
-- `good()`    
+- `eof()` - returns `true` if `eofbit` is set
+- `fail()` - returns `true` if `failbit` **or** `badbit` is set
+- `bad()` - returns `true` if `badbit` is set
+- `good()` - returns `true` if **no** flag is set (`rdstate() == ios::goodbit`)
 
 ## Check for end of file
 
 ```c++
 if( fstr.eof() ) {}
 // or
-if( myfile.rdstate() == ios::badbit ) {}
+if( fstr.rdstate() & ios::eofbit ) {}
 ```
 
 ## Read current state
 
 ```c++
-stream.rdstate() == <STATUS_FLAG>
+// use bitwise AND, since more than one flag can be set at the same time (e.g. eofbit and failbit)
+(stream.rdstate() & <STATUS_FLAG>) != 0
 ```
 
 ## Clear current status flag
@@ -73,12 +74,12 @@ file_stream.write(reinterpret_cast<const char*>(&VAR/ARRAY[INDEX]),sizeof(DATA_T
 ## Read format
     
 ```c++
-file.read(reinterpret_cast<char*>(&VAR/ARRAY[INDEX]),sizeof(DATA_TYPE_OF_VAR/ARRAY)*NUM_OF_ELEMENT_YOU_WANT_TO_WRITE);
-````
+file.read(reinterpret_cast<char*>(&VAR/ARRAY[INDEX]),sizeof(DATA_TYPE_OF_VAR/ARRAY)*NUM_OF_ELEMENT_YOU_WANT_TO_READ);
+```
     
 > [!NOTE]
-> for **single variables** the `NUM_OF_ELEMENT_YOU_WANT_TO_WRITE` is equal to `1`
-> or you can omit the `*NUM_OF_ELEMENT_YOU_WANT_TO_WRITE`.
+> for **single variables** the `NUM_OF_ELEMENT_YOU_WANT_TO_WRITE/READ` is equal to `1`
+> or you can omit the `*NUM_OF_ELEMENT_YOU_WANT_TO_WRITE/READ`.
 
 ---
 
@@ -86,7 +87,7 @@ file.read(reinterpret_cast<char*>(&VAR/ARRAY[INDEX]),sizeof(DATA_TYPE_OF_VAR/ARR
 
 ```C++
 std::ifstream binFile("binaryFile", std::ios::in | std::ios::binary);
-if (!binFile.is_open()) throw std::argument_error("the given filename might not be existing");
+if (!binFile.is_open()) throw std::invalid_argument("the given file might not exist");
 
 unsigned char binValues[8];
 binFile.read(reinterpret_cast<char*>(&binValues[0]),sizeof(unsigned char)*8);
@@ -95,8 +96,8 @@ binFile.read(reinterpret_cast<char*>(&binValues[0]),sizeof(unsigned char)*8);
 ## Writing
 
 ```C++
-std::ofstream binFile("binaryFile", std::ios::out | std::ios::binary);
-if (!binFile.is_open()) throw std::argument_error("the given filename might not be existing");
+std::ofstream binFile("binaryFile", std::ios::out | std::ios::binary); // creates the file if it does not exist
+if (!binFile.is_open()) throw std::runtime_error("the file could not be created/opened");
     
 unsigned char binValues[8];
 binFile.write(reinterpret_cast<const char*>(&binValues[0]),sizeof(unsigned char)*8);
@@ -106,13 +107,15 @@ binFile.write(reinterpret_cast<const char*>(&binValues[0]),sizeof(unsigned char)
 
 ```c++
 #include <iostream>
-#include <exception>
+#include <fstream>
+#include <stdexcept>
 
 int main()
 {
     #ifdef WRITE_PROG
-        std::fstream writeBinFile("binaryFile", std::ios::in | std::ios::out | std::ios::binary);
-        if (!writeBinFile.is_open()) throw std::logic_error("the given filename might not be existing");
+        // NOTE: std::ios::in | std::ios::out would fail if the file does not exist yet, so only use std::ios::out here
+        std::fstream writeBinFile("binaryFile", std::ios::out | std::ios::binary);
+        if (!writeBinFile.is_open()) throw std::runtime_error("the file could not be created/opened");
 
         unsigned char binValues[8] { 't','h','i','s',' ','h','o','t' };
         long negative = -777;
@@ -125,13 +128,14 @@ int main()
 
     #ifdef READ_PROG
         std::fstream readBinFile("binaryFile", std::ios::in | std::ios::out | std::ios::binary);
-        if (!readBinFile.is_open()) throw std::logic_error("the given filename might not be existing");
+        if (!readBinFile.is_open()) throw std::runtime_error("the given file might not exist");
 
-        unsigned char readValues[8];
+        unsigned char readValues[9] {}; // 8 chars + 1 null terminator, needed because it is printed as a C-string below
         long readNum;
         readBinFile.read(reinterpret_cast<char*>(&readValues[0]),sizeof(unsigned char)*4);
         readBinFile.read(reinterpret_cast<char*>(&readNum),sizeof(long)*1);
         readBinFile.read(reinterpret_cast<char*>(&readValues[4]),sizeof(unsigned char)*4);
+        readValues[8] = '\0';
         std::cout << "read = " << readValues << "\n";
         std::cout << "number = " << readNum << "\n";
         readBinFile.close();
@@ -147,7 +151,7 @@ int main()
 - calling the `read()` method will automatically change the position of get pointer
 
 ```c++
-#define CHUNK_SIZE 1024;
+#define CHUNK_SIZE 1024 // no semicolon here, otherwise `new char[CHUNK_SIZE]` becomes `new char[1024;]`
     
 char *tbuffer = new char[CHUNK_SIZE]; // CHUNK_SIZE in bytes
 char optional_initial_reads[16];
@@ -156,20 +160,26 @@ std::ifstream curr_file(filename,std::ios::binary);
 
 curr_file.read(optional_initial_reads,16);
     
-while(!curr_file.eof())
+// `read()` returns the stream, which converts to false when it fails (e.g. it hit EOF before reading CHUNK_SIZE bytes),
+// so also check gcount() to still process the last partial chunk.
+// This avoids the classic `while(!eof())` bug, where an extra empty iteration happens
+// when the file size is an exact multiple of CHUNK_SIZE.
+while(curr_file.read(tbuffer,CHUNK_SIZE) || curr_file.gcount() > 0)
 {
-    curr_file.read(tbuffer,CHUNK_SIZE);
     size_t read_buffer_size = curr_file.gcount();
 
     if(!curr_file.eof())
     {
-        // not last chunk operations
+        // not last chunk operations (read_buffer_size == CHUNK_SIZE)
     }
     else
     {
-        // last chunk operations
+        // last chunk operations (read_buffer_size <= CHUNK_SIZE)
+        break;
     }
-} 
+}
+
+delete[] tbuffer;
 ```
 
 ----- 
@@ -186,6 +196,11 @@ while(!curr_file.eof())
 #include <filesystem>
 #include <system_error>
 #include <algorithm>
+#include <functional>
+#include <array>
+#include <cstring>
+#include <cerrno>
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 
@@ -219,20 +234,15 @@ void read_file_chunked(const fs::path& p,
 }
 
 // --- 2) Chunk / block writing (binary) ---
-// Append style writing of a stream of chunks (or direct write at start with truncation)
+// Append style writing of a stream of chunks (or write from the start after truncation)
 void write_file_chunked(const fs::path& p,
                         std::vector<std::vector<byte>> const& chunks,
                         bool truncate_before = true)
 {
-    std::ofstream out(p, std::ios::binary | std::ios::in | std::ios::out);
-    if (!out) {
-        // try create
-        out.open(p, std::ios::binary | std::ios::trunc);
-        if (!out) throw std::system_error(errno, std::generic_category(), "open for write failed");
-    } else if (truncate_before) {
-        out.close();
-        out.open(p, std::ios::binary | std::ios::trunc);
-    }
+    // trunc -> erase existing content, app -> every write goes to the end of the file
+    // (both modes create the file if it does not exist)
+    std::ofstream out(p, std::ios::binary | (truncate_before ? std::ios::trunc : std::ios::app));
+    if (!out) throw std::system_error(errno, std::generic_category(), "open for write failed");
 
     for (auto const& c : chunks) {
         out.write(reinterpret_cast<const char*>(c.data()), static_cast<std::streamsize>(c.size()));
@@ -328,24 +338,20 @@ std::uint64_t find_sequence_first(const fs::path& p,
     std::ifstream in(p, std::ios::binary);
     if (!in) throw std::system_error(errno, std::generic_category(), "open for read failed");
 
+    // keep the last (pattern.size() - 1) bytes of each chunk so that matches
+    // crossing a chunk boundary are not missed
     const std::size_t overlap = pattern.size() - 1;
     std::vector<byte> buffer;
     buffer.resize(chunk_size + overlap);
 
-    std::uint64_t global_offset = 0;
-    bool first_read = true;
+    std::uint64_t buffer_start = 0; // file offset of buffer[0]
+    std::size_t carried = 0;        // number of bytes carried over from the previous chunk
     while (in) {
-        // move leftover overlap to front when not first read
-        if (!first_read) {
-            // buffer already contains overlap bytes at front from previous iteration
-        }
-
-        // read chunk after the overlap region
-        in.read(reinterpret_cast<char*>(buffer.data() + overlap), static_cast<std::streamsize>(chunk_size));
+        // read the next chunk right after the carried-over bytes
+        in.read(reinterpret_cast<char*>(buffer.data() + carried), static_cast<std::streamsize>(chunk_size));
         std::streamsize readn = in.gcount();
         if (readn <= 0) break;
-        std::size_t valid = static_cast<std::size_t>(readn) + (first_read ? 0 : overlap);
-        std::size_t window = valid;
+        std::size_t window = carried + static_cast<std::size_t>(readn);
 
         // run BMH on buffer[0..window)
         std::size_t idx = 0;
@@ -357,22 +363,18 @@ std::uint64_t find_sequence_first(const fs::path& p,
                 --j;
             }
             if (j == 0 && buffer[idx] == pattern[0]) {
-                return global_offset + idx;
+                return buffer_start + idx;
             }
             // shift using bad-char
             unsigned char next = buffer[idx + pattern.size() - 1];
             idx += bad[next];
         }
 
-        // prepare overlap for next read
-        if (window >= overlap) {
-            std::memmove(buffer.data(), buffer.data() + window - overlap, overlap);
-        } else {
-            // window smaller than overlap
-            std::memmove(buffer.data(), buffer.data() + 0, window);
-        }
-        global_offset += (first_read ? static_cast<std::size_t>(readn) : chunk_size);
-        first_read = false;
+        // move the last `overlap` bytes to the front for the next read
+        std::size_t keep = std::min(overlap, window);
+        std::memmove(buffer.data(), buffer.data() + window - keep, keep);
+        buffer_start += window - keep;
+        carried = keep;
     }
 
     return static_cast<std::uint64_t>(-1); // not found

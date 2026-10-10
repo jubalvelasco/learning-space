@@ -1,12 +1,12 @@
 # The `match` Control Flow Construct
 
-_This is just like the `switch` statement in C/C++ and other programming languages_.
+_This is similar to the `switch` statement in C/C++ and other programming languages, but much more powerful (it matches patterns, not just constant values, must be exhaustive, and doesn't fall through)_.
 
 The `match` **expressions** allow you to **compare** a **value** against a **series of patterns** and then **execute code** based on which **pattern matches**.
 
 **Patterns** can be made up of **literal values**, **variable names**, **wildcards**, and many other things; Chapter 18 of the Rust Book covers all the different kinds of patterns and what they do.
 
-**Arms** are the condition where patterns could match. When the match expression executes, it **compares** the resultant value against the pattern of each arm, in order. If a **pattern matches** the value, **the code associated with that pattern is executed**. If that **pattern doesn’t match** the value, execution **continues to the next arm**.
+**Arms** are the `pattern => code` pairs of a match expression. When the match expression executes, it **compares** the resultant value against the pattern of each arm, in order. If a **pattern matches** the value, **the code associated with that pattern is executed**. If that **pattern doesn’t match** the value, execution **continues to the next arm**.
 
 _We don’t typically use curly brackets if the match arm code is short_.
 
@@ -71,10 +71,7 @@ fn main() {
 ### Output:
 
 ```bash
-Coin::Dime = 10
-------------------------------------
 State quarter from Alabama!
-Coin::Quarter = 25
 ```
 
 # Matching with Generic Enums : `Option<T>`
@@ -110,9 +107,9 @@ Rust prevents us from forgetting to explicitly handle the None case (**exhaustiv
 
 # Catch-all Patterns and the `_` Placeholder (C++ `switch` `default`'s)
 
-Using `enums`, we can also take **special actions for a few particular values**, but **for all other values** take **one default action**.
+Using `match`, we can also take **special actions for a few particular values**, but **for all other values** take **one default action**.
 
-We can do this by simply naming out last arm variable `other => move_player(other),`.
+We can do this by simply naming our last arm with a variable, e.g. `other => move_player(other),` (the catch-all arm must be the last one, since arms are checked in order).
 
 ```rust
 let dice_roll = 9;
@@ -127,8 +124,14 @@ fn remove_fancy_hat() {}
 fn move_player(num_spaces: u8) {}
 ```
 
-The catch all pattern lets you to use all the other values in the match expression, however if you don't want to use all the other values then we can use the `_` instead to catch all variants or values in the patterns without using them:
+The catch-all pattern lets you use all the other values in the match expression, however if you don't want to use the other values then we can use the `_` instead to catch all variants or values in the patterns without binding them:
 
 ```rust
-other => move_player(other),
+match dice_roll {
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    _ => reroll(), // or `_ => (),` to do nothing
+}
+
+fn reroll() {}
 ```

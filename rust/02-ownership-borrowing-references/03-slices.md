@@ -2,7 +2,7 @@
 
 Slices let you reference **a part** of a contiguous sequence of elements in a collection rather than the whole collection. A slice is **a kind of reference**, so it **does not have ownership**.
 
-All rules of ownership and borrowing also applies to slices.
+All rules of ownership and borrowing also apply to slices.
 
 ```rust
 let a = [1, 2, 3, 4, 5];
@@ -17,14 +17,14 @@ We create slices using a range within brackets by specifying `[starting_index..e
 
 We can drop the **`starting_index` number** if we want to automatically start at the front most index of our slice, e.g: `&a[..3]`.
 
-We can also drop the **`ending_index` number** if want to slice up until to the last most index automatically, e.g: `&a[1..]`.
+We can also drop the **`ending_index` number** if we want to slice up to the last index automatically, e.g: `&a[1..]`.
 
 We can **even drop both `starting_index`** and **`ending_index`** values in the slice range to get a whole slice, e.g: `&a[..]`.
 
 > [!Note]  
 > String slice range indices must occur at valid UTF-8 character boundaries.
 >
-> If you attempt to create a string slice in the middle of a multibyte character, your program will exit with an error.
+> If you attempt to create a string slice in the middle of a multibyte character, your program will panic (exit with an error).
 >
 > For the purposes of introducing string slices, we are assuming ASCII only in this section; a more thorough discussion of UTF-8 handling is in the “Storing UTF-8 Encoded Text with Strings” section of Chapter 8.
 
@@ -36,7 +36,7 @@ This slice has the type `&[i32]`
 let slice = &a[1..3];
 ```
 
-This kind of slice is common for different types of collections, the format of the type of the slice is, It works the same way as string slices do, by **storing a reference** to the **first element** and a **length**.
+This kind of slice is common for different types of collections. It works the same way as string slices do, by **storing a reference** to the **first element** and a **length**. The format of the slice type is:
 
 ```rust
 &[type]
@@ -44,7 +44,7 @@ This kind of slice is common for different types of collections, the format of t
 
 # Functions and Slices
 
-**`iter()`** is a method that returns each element in a collection.
+**`iter()`** is a method that returns an iterator over (references to) each element in a collection.
 
 **`enumerate()`** wraps the result of `iter()` and returns each element as part of a `tuple` instead, The first element of the `tuple` returned from `enumerate()` is the **index**, and the second element is a **reference to the element**. This is a bit more convenient than calculating the index ourselves.
 

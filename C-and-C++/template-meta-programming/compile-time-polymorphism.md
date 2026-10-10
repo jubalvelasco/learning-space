@@ -2,7 +2,9 @@
 
 ## **Compile Time Polymorphism : Heap or Stack Allocations**
 
-In this examples we will try to create a class that can allocate an array attribute/member on stack or in heap without using runtime-polymorphism.
+In these examples we will try to create a class that can allocate an array attribute/member on stack or in heap without using runtime-polymorphism.
+
+NOTE: names that start with an underscore followed by an uppercase letter (like `_T`, `_Rows`) are reserved for the compiler/standard library in C++, so in real code prefer names like `U` or `R` for them.
 
 - **Example 1 :**
 
@@ -43,10 +45,10 @@ In this examples we will try to create a class that can allocate an array attrib
     Matrix<char, 5, 5, stack_allocator> a;
     Matrix<char, 0, 0, heap_allocator> b(5, 5);
 
-    std::cout << "sizeof(a) = " << sizeof(a) << "\n";
+    std::cout << "sizeof(a) = " << sizeof(a) << "\n"; // 25 (5 * 5 chars)
 
-    // 16 byte for the two size_t members
-    // and another 8 byte (4 byte for x86) for the pointer.
+    // on 64-bit: 16 bytes for the two size_t members and another 8 bytes for the pointer = 24
+    // (on 32-bit x86, size_t and pointers are 4 bytes each, so 12)
     std::cout << "sizeof(b) = " << sizeof(b) << "\n";
   }
   ```
@@ -100,10 +102,10 @@ In this examples we will try to create a class that can allocate an array attrib
     Matrix<char, 5, 5> a; // Uses stack_allocator
     Matrix<char> b(5, 5); // Uses heap_allocator
 
-    std::cout << "sizeof(a) = " << sizeof(a) << "\n";
+    std::cout << "sizeof(a) = " << sizeof(a) << "\n"; // 25 (5 * 5 chars)
 
-    // 16 byte for the two size_t members
-    // and another 8 byte (4 byte for x86) for the pointer.
+    // on 64-bit: 16 bytes for the two size_t members and another 8 bytes for the pointer = 24
+    // (on 32-bit x86, size_t and pointers are 4 bytes each, so 12)
     std::cout << "sizeof(b) = " << sizeof(b) << "\n";
   }
 

@@ -14,16 +14,16 @@
 
 `Ctrl + Shift + \` Jump to matching bracket
 
-`Alt + Enter` Select all occurences of Find match
+`Alt + Enter` Select all occurrences of Find match
 
-`Alt + ←` Go Back to last edit
+`Alt + ←` Go Back to last edit (custom, see overrides below; by default `Alt + ←` is Go Back to previous cursor position)
 
-`Alt + →` Go Forward to next edit
+`Alt + →` Go Forward to next edit (custom, see overrides below)
 
 
-`Alt + ,` Go Back to previous cursor position
+`Alt + ,` Go Back to previous cursor position (custom)
 
-`Alt + .` Go Forward to next cursor position (if available)
+`Alt + .` Go Forward to next cursor position (if available) (custom)
 
 ## File manipulation
 
@@ -31,9 +31,9 @@
 
 `Ctrl + ]/[` Indent/outdent line
 
-## Formating
+## Formatting
 
-`Ctrl + Shift + I` - format with current formatter
+`Ctrl + Shift + I` - format with current formatter (Linux default; on Windows it's `Shift + Alt + F`)
 
 ## Suggestions / Completion / Hints
 
@@ -54,7 +54,7 @@
 ## Override Keybindings
 
 ```json
-// keybinding.json
+// keybindings.json
 
 // Place your key bindings in this file to override the defaults:
 // Ctrl+P then search Keyboard Shortcuts (JSON) and select it

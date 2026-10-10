@@ -10,12 +10,12 @@ The main purpose of ownership is to manage heap data.
     - Similarly also by default, if we **pass a variable as a function argument**, the old variable also becomes invalid, and the function parameter now becomes the new owner (this is also another **move**).
 3. When the owner goes out of scope, the value will be dropped.
 
-_As you can see here **move** are the default behaviour of rust when assigning or passing variables_.
+_As you can see here, a **move** is the default behaviour of rust when assigning or passing variables (for types that don't implement `Copy`)_.
 
 > [!Note]  
 > In C++, this pattern of deallocating resources at the end of an item’s lifetime is called the **RAII** or **Resource Acquisition Is Initialization**.
 >
-> The `drop` function in Rust will be familiar to you if you’ve used RAII patterns, this is quiet similar to `destructors` of C++ classes where it is also automatically called when an object goes out of scope, **except that in rust the old variable becomes unusable** because of the default move.
+> The `drop` function in Rust will be familiar to you if you’ve used RAII patterns, this is quite similar to `destructors` of C++ classes where it is also automatically called when an object goes out of scope, **except that in rust the old variable becomes unusable** because of the default move.
 
 ### Stack Data Should Be Copied
 
@@ -23,7 +23,7 @@ Rust has a special annotation called the `Copy` **trait** that we can place on t
 
 If a **type implements** the **`Copy` trait**, variables that use it **do not move**, but rather are **trivially copied**, making them **still valid after assigning** to another variable.
 
-Some rust built-in data types implements the `Copy` trait by default like scalar value and arrays on stack.
+Some rust built-in data types implement the `Copy` trait by default like scalar values, and arrays/tuples whose elements are all `Copy`.
 
 ```rust
 // variable on stack is copied
@@ -63,9 +63,9 @@ Here are some of the types that implement Copy:
 
 ### Heap Data are Move (In C++ Term) by Default
 
-By following the rules that was previously stated above, it is impossible to directly copy heap-allocated data like the `String` type since it **does not implement** the **`Copy` trait** so it will always be a **move**.
+By following the rules that were previously stated above, it is impossible to implicitly copy heap-allocated data like the `String` type since it **does not implement** the **`Copy` trait** so it will always be a **move**.
 
-_The `String` type might also implements the `Drop` trait somewhere inside its declaration be it indirectly or directly to clean-up heap-allocated resources_.
+_The `String` type (indirectly, through the `Vec<u8>` buffer inside it) implements the `Drop` trait to clean-up its heap-allocated resources, which is exactly why it cannot be `Copy`_.
 
 ```rust
 let s1 = String::from("hello");
@@ -79,7 +79,7 @@ println!("{}, world!", s2);
 
 If we do want to **copy the heap data** of the String and other heap-allocated data types, not just the stack data, we can use a common method called `clone()`. 
 
-_In my understanding the clone method should be implemented in a way that it allocates a new space in the heap, then it copies the values of the original data, after that using the default move semantic behaviour of rust mentioned in the very begining; the new heap-allocated copied data will be move to the variable where it was assigned or passed if it was a function_.
+_In my understanding the clone method should be implemented in a way that it allocates a new space in the heap, then it copies the values of the original data, after that using the default move semantic behaviour of rust mentioned in the very beginning; the new heap-allocated copied data will be moved to the variable where it was assigned (or to the parameter, if it was passed to a function)_.
 
 ```rust
 let s1 = String::from("hello");
@@ -91,9 +91,9 @@ println!("s1 = {}, s2 = {}", s1, s2);
 
 ### Ownership and Functions
 
-The mechanics of passing a value to a function are similar to those when assigning a value to a variable. Passing a variable to a function will move or copy, just as assignment does ([as stated above in no.3](#ownership-rules)).
+The mechanics of passing a value to a function are similar to those when assigning a value to a variable. Passing a variable to a function will move or copy, just as assignment does ([as stated above in no.2](#ownership-rules)).
 
-When passing a variable in a paremeter as an argument that is not a reference, the value **ownership** will be move to the function parameter, leaving the old variable unusable.
+When passing a variable to a parameter as an argument that is not a reference, the value **ownership** will be moved to the function parameter, leaving the old variable unusable.
 
 ```rust
 fn main() {

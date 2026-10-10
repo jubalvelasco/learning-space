@@ -57,4 +57,4 @@ The body of the module then goes inside curly brackets.
 
 **Inside modules**, we can **place other modules**.
 
-Modules **can also hold definitions** for other items, such as **`structs`**, **`enums`**, **constants**, **traits**, and **function**.
+Modules **can also hold definitions** for other items, such as **`structs`**, **`enums`**, **constants**, **traits**, and **functions**.

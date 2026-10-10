@@ -4,7 +4,7 @@
 
 ## How does object detection work?
 
-Object detection generally is categorized into 2 stages:
+Object detectors are generally categorized into 2 types:
 
 1. Single-stage object detectors.
 2. Two-stage object detectors.
@@ -42,7 +42,7 @@ The two-stage architecture involves (1) object region proposal with conventional
 
 Various two-stage detectors include region convolutional neural network (RCNN), with evolutions Faster R-CNN or Mask R-CNN. The latest evolution is the granulated RCNN (G-RCNN).
 
-Two-stage object detectors first find a region of interest and use this cropped region for classification. However, such multi-stage detectors are usually not end-to-end trainable because cropping is a non-differentiable operation.
+Two-stage object detectors first find a region of interest and use this cropped region for classification. However, early multi-stage detectors (like the original R-CNN) were not end-to-end trainable because cropping is a non-differentiable operation (Faster R-CNN later made the whole network trainable end-to-end by sharing features and using RoI pooling).
 
 
 ## Object detection model architecture
@@ -57,24 +57,24 @@ _Region-based Convolutional Neural Networks_
     - An **RPN** is a network utilized in generating **RoIs** by regressing the anchor boxes. Hence, the anchor boxes are then used in the object detection task.
 4. **Mask R-CNN** adds a mask prediction branch on the **Faster R-CNN**, which can detect objects and predict their masks at the same time.
 5. **R-FCN**  replaces the fully connected layers with the position-sensitive score maps for better detecting objects.
-6. **Cascade R-CNN** addresses the problem of overfitting at training and quality mismatch at inference by training a sequence of detectors with increasing **IoU** (ntersection over union) thresholds.
+6. **Cascade R-CNN** addresses the problem of overfitting at training and quality mismatch at inference by training a sequence of detectors with increasing **IoU** (Intersection over Union) thresholds.
 
 ### II. YOLO Model Family
 
-1. **YOLO** uses fewer anchor boxes (divide the input image into an S × S grid) to do regression and classification. This was built using darknet neural networks.
-2. **YOLOv2** improves the performance by using more anchor boxes and a new bounding box regression method.
+1. **YOLO** (v1) does not use anchor boxes at all: it divides the input image into an S × S grid and each grid cell directly regresses a few bounding boxes and predicts class probabilities. This was built using the Darknet framework.
+2. **YOLOv2** improves the performance by introducing anchor boxes (chosen with k-means clustering) and a new bounding box regression method.
 3. **YOLOv3** is an enhanced version of the v2 variant with a deeper feature detector network and minor representational changes. **YOLOv3** has relatively speedy inference times with it taking roughly 30ms per inference.
 4. **YOLOv4** (**YOLOv3** upgrade) works by breaking the object detection task into two pieces, regression to identify object positioning via bounding boxes and classification to determine the object's class. **YOLO V4** and its successors are technically the product of a different set of researchers than versions 1-3.
-5. **YOLOv5** is an improved version of **YOLOv4** with a mosaic augmentation technique for increasing the general performance of **YOLOv4**.
+5. **YOLOv5** (by Ultralytics, implemented in PyTorch instead of Darknet) is an improved/re-engineered version of the **YOLOv4** ideas (it also uses the mosaic augmentation technique, which was introduced in **YOLOv4**), focused on ease of use and deployment.
 
-### III. CenterNet
+### III. SSD Family and Keypoint-Based Detectors (CornerNet / CenterNet)
 
 1. **SSD (Single Shot Multibox Detector)** places anchor boxes densely over an input image and uses features from different convolutional layers to regress and classify the anchor boxes.
 2. **DSSD (Deconvolutional Single Shot Detector )** introduces a deconvolution module into **SSD** to combine low level and high-level features. While **R-SSD** uses pooling and deconvolution operations in different feature layers to combine low-level and high-level features.
 3. **RON (Reverse Connection With Objectness Prior Networks for Object Detection)** proposes a reverse connection and an objectness prior to extracting multiscale features effectively.
 4. **RefineDet (Single-Shot Refinement Neural Network for Object Detection)** refines the locations and sizes of the anchor boxes for two times, which inherits the merits of both one-stage and two-stage approaches.
 5. **CornerNet** is another keypoint-based approach, which directly detects an object using a pair of corners. Although CornerNet achieves high performance, it still has more room to improve.
-6. **CenterNet** explores the visual patterns within each bounding box. For detecting an object, this uses a triplet, rather than a pair, of keypoints. **CenterNet** evaluates objects as single points by predicting the x and y coordinate of the object’s center and it’s area of coverage (width and height). It is a unique technique that has proven to out-perform variants like the SSD and R-CNN family.  
+6. **CenterNet** - there are actually two different 2019 papers with this name: **"CenterNet: Keypoint Triplets"** explores the visual patterns within each bounding box and detects an object using a triplet (two corners + center), rather than a pair, of keypoints; while **"Objects as Points"** treats objects as single points by predicting the x and y coordinate of the object’s center and its size (width and height). Both reported better speed/accuracy trade-offs than many SSD and R-CNN variants at the time.
 
 ### IV. Others
 
@@ -116,7 +116,7 @@ _The most important one-stage object detection algorithms_
 8. YOLOv8 (2023)
 9. YOLOv9 (2024)
 
-The creators of the original YOLO algorithms did not release YOLOv8. It’s important to note that it was published under an AGPL-3.0 License, a strong copyleft license that limits commercial use.
+The creators of the original YOLO algorithms did not release YOLOv8 (it was released by Ultralytics). It’s important to note that it was published under an AGPL-3.0 License, a strong copyleft license: commercial use is allowed, but if you distribute it, or let users interact with it over a network, you must release your own source code under the same license (Ultralytics sells a separate commercial license to avoid this).
  
 -----
 
@@ -136,9 +136,9 @@ In comparison of the latest YOLO versions – YOLOv8 vs. YOLOv7 and YOLOv6 – t
 
 ## Data Sets
  
-- COCO dataset - an image dataset composed of 90 different classes of objects (cars, persons, sport balls, bicycles, dogs, cats, horses e.t.c).
+- COCO dataset (Common Objects in Context, released in 2014) - an image dataset whose object detection task uses 80 object categories (out of 91 originally defined) (cars, persons, sport balls, bicycles, dogs, cats, horses etc.).
     
-    The dataset was gathered to solve common object detection problems. Nowadays it is becoming outdated as its images were captured mostly in the early 2,000’s making them much smaller, grainier, and with different objects than today’s images.
+    The dataset was gathered to solve common object detection problems. Nowadays some consider it to be becoming outdated, since its images (collected from Flickr) are relatively small and low resolution compared to today’s images.
     
 - Newer datasets like OpenImages are taking its spot as the de-facto pre-training dataset.
  
@@ -150,11 +150,11 @@ In comparison of the latest YOLO versions – YOLOv8 vs. YOLOv7 and YOLOv6 – t
  
 ## Object detection vs image segmentation
  
-- "**Image Classification**"
+- "**Image Classification**" assigns a single label (class) to the whole image, without saying where the object is.
  
 - "**Image segmentation**" is the process of defining which pixels of an object class are found in an image.
 
-- "**Semantic image segmentation**" will mark all pixels belonging to that tag, but won’t define the boundaries of each object.
+- "**Semantic image segmentation**" will mark all pixels belonging to that tag (class), but won’t separate the individual objects (two touching cars are just one "car" region).
 
 - "**Object Detection**" instead will not segment the object, but will clearly define the location of each individual object instance with a box.
 

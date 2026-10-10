@@ -5,7 +5,7 @@
 - Calculus 1 & 2
 - Linear Algebra
 - Electromagnetic Spectrum
-- Basic Cuircuit Design/Engineering (Ohms Law)
+- Basic Circuit Design/Engineering (Ohm's Law)
 
 ## C
 

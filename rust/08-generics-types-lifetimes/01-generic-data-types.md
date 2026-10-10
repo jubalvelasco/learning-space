@@ -1,6 +1,6 @@
 # Generic Data Types
 
-This an example code that finds the largest value in an array of `i32` and `char` by using duplicated code.
+This is an example code that finds the largest value in an array of `i32` and `char` by using duplicated code.
 
 ```rust
 fn largest_i32(list: &[i32]) -> &i32 {
@@ -53,7 +53,7 @@ fn largest<T>(list: &[T]) -> &T {
 ```
 
 > [!IMPORTANT]  
-> This code will **fail to compile**, the line `if item > largest` uses the greater than operator, but what if we pass a type `T` that does not implement the **greater than operator** (or a certain trait or operator?) rust would detect this error at compile time.
+> This code will **fail to compile**, the line `if item > largest` uses the greater than operator, but what if we pass a type `T` that does not implement the **greater than operator** (i.e. the `PartialOrd` trait)? Rust checks the generic function body against its declared bounds, so it rejects this code at compile time, even before it is called with any type.
 
 # Adding Traits as Type Constraints
 
@@ -73,7 +73,7 @@ fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
 }
 ```
 
-The `std::cmp::PartialOrd` is a restriction for the type `T`, imagine it like **`C++ Concepts or the older SFINAE`** to restrict types. In C++, if we only give `T` without the restriction we might get missing symbol or reference errors in the future, to prevent this problem with templates in C++20 we can use **concepts** to add restrictions to the types that we are passing to our template parameters.
+The `std::cmp::PartialOrd` is a restriction for the type `T`, imagine it like **`C++ Concepts or the older SFINAE`** to restrict types. In C++, if we only give `T` without the restriction, the template is only checked when it gets instantiated, so passing an unsupported type produces long and confusing compile errors deep inside the template code; to prevent this problem with templates in C++20 we can use **concepts** to add restrictions to the types that we are passing to our template parameters. (One difference: Rust *requires* the bound, while C++ concepts are optional.)
 
 Similarly in the rust code above, adding the trait `: std::cmp::PartialOrd` will restrict the types valid for `T` to only those that implement the said trait, this would tell the compiler that it should only accept types that can be ordered or have the greater than operator.
 

@@ -8,8 +8,8 @@ else              printf("same signs\n");
 
 #### Check if the number is odd or even
 ```c++
-if(num&1) cout << n << " is odd";
-else      cout << n << " is even";
+if(num&1) cout << num << " is odd";
+else      cout << num << " is even";
 ```
 
 #### Flipping 1 to 0, and 0 to 1
@@ -19,32 +19,37 @@ unsigned int flip(unsigned int one_or_zero) {
 }
 ```
 
-#### Check if numbers in the range of 1 and 0 is not-equal
+#### Check if two numbers in the range of 0 and 1 are not equal
 ```c++
 unsigned int not_equal(unsigned int one_or_zero_A, unsigned int one_or_zero_B) {
     return (one_or_zero_A ^ one_or_zero_B);
 }
 ```
 
-#### Check if numbers in the range of 1 and 0 is equal
-To do this combine the previous two techniques of flipping 1 and 0, and using xor to check if two numbers is equal.
+#### Check if two numbers in the range of 0 and 1 are equal
+To do this, combine the previous two techniques: use xor to check if the two numbers are not equal, then flip the result.
+```c++
+unsigned int equal(unsigned int one_or_zero_A, unsigned int one_or_zero_B) {
+    return (one_or_zero_A ^ one_or_zero_B) ^ 1u;
+}
+```
 
 ### LETTERS
 
 #### Invert the case of a character (upper to lower and vice versa)
 ```c++
-char(letter ^ ' ')
+char(letter ^ ' ') // works for ASCII letters only (' ' is 32, the bit that differs between cases)
 ```
 
 #### Find the position of a letter in alphabet (case irrelevant)
 ```c++
-(letter & 31) // returns position 1
-(letter & 31) // returns position 3
+('a' & 31) // returns position 1
+('C' & 31) // returns position 3
 ```
 
 ### INDEXING
 
-#### NOTE: the following examples reads the bits from right to left
+#### NOTE: the following examples read the bits from right to left
 ```
 example : bit[N] bit[N-1] ... bit[1] bit[0]
 ```
@@ -69,10 +74,10 @@ num ^= (1 << i);
 #### Check if the K'th bit is SET/ON
 ```c++
 int num = 430, i = 1;
-//430 -> 10101110
+//430 -> 110101110
 
-bool ON = num&(1<<i)
-// which in the case of 430, the 2nd bit is ON so the boolean is set to true
+bool ON = num&(1<<i);
+// which in the case of 430, bit[1] (the 2nd bit from the right) is ON so the boolean is set to true
 ```
 
 #### Display bits
@@ -90,7 +95,7 @@ int main(){
     // display all bits
     std::cout << std::bitset<INT_TOTAL_BITS>(num) <<  "\n";
 
-    // display the first 8 bits
+    // display the lowest (rightmost) 8 bits
     std::cout << std::bitset<8>(num) << "\n";
     return 0;
 }
@@ -130,7 +135,9 @@ unsigned int method2(unsigned char byte4, unsigned char byte3, unsigned char byt
 
 unsigned int method3(unsigned char byte4, unsigned char byte3, unsigned char byte2, unsigned char byte1)
 {
-    return (byte4 << 24u)|(byte3<<16u)|(byte2<<8u)|byte1;
+    // the casts are needed because `unsigned char` is promoted to (signed) `int` before shifting,
+    // and shifting a value >= 0x80 by 24 into the sign bit of an int is undefined behavior before C++20
+    return ((unsigned int)byte4 << 24u)|((unsigned int)byte3<<16u)|((unsigned int)byte2<<8u)|byte1;
 }
 ```
 

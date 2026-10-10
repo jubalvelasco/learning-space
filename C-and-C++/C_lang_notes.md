@@ -7,8 +7,8 @@
 #### > printing hex format in printf()
 
 ```c++
-print("%08x",num);
+printf("%08x", num);
 ```
 
-- the **08** means that the hex value will be padded to meet the display length of 4 total bytes (8 hex char)
-- a lowercase **x** will display small hex letters from a-f, and an uppercase **X** will display capital characters of A-F
+- the **08** means that the hex value will be zero-padded to a minimum width of 8 hex characters (which represents 4 bytes)
+- a lowercase **x** will display lowercase hex letters a-f, and an uppercase **X** will display uppercase letters A-F

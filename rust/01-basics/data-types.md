@@ -28,8 +28,8 @@ In other languages they can be called as "built-in" or "primitive" types.
 Like C, C++ and Python. Rust also supports writing integers in other
 representation format.
 
-This being on **Binary (`0b`)**, **Octal (`0o`)**, **Decimal** and
-**Hex (`0x`)**. Rust also have a **Byte** e.g. : `b'A'`.
+These being **Binary (`0b`)**, **Octal (`0o`)**, **Decimal** and
+**Hex (`0x`)**. Rust also has a **Byte** literal (type `u8` only) e.g. : `b'A'`.
 
 You can also separate a digit literal with the `_` (underscore) character
 to make it easier to read, example:
@@ -54,7 +54,7 @@ let lucky = 7_77;         // 777
 
 - **Release Mode** - Rust does not include checks for integer overflow that cause panics. Instead, if overflow occurs, Rust performs two’s complement wrapping.
 
-Unlike C and C++, Rust considers wrapping behavior an error, to **explicitly** handle the possibility of overflow, the standard library provides families of methods for primitive numeric types like:
+Unlike C and C++ (where unsigned overflow silently wraps and signed overflow is undefined behavior), Rust considers unintended overflow an error. To **explicitly** handle the possibility of overflow, the standard library provides families of methods for primitive numeric types like:
 
 - `wrapping_*` methods ex: `wrapping_add`
 - `checked_*`
@@ -72,21 +72,21 @@ Represented by the usual **IEEE-754** standard.
 
 # **Boolean Types**
 
-Unlike C and C++ where a boolean is just an integers, Rust has a distinguished difference between **integer** types and **boolean** types.
+Unlike C, where a boolean was historically just an integer, Rust has a distinguished difference between **integer** types and **boolean** types.
 
 In rust a **boolean** has the same size as a **byte**, and a boolean can only contain the value **`true`** and **`false`**.
 
 # **Character types**
 
-Another difference unlike C and C++ where `int8` are just `char` (characters), rust also separates the two, in rust the type for characters is **`char`** and this is different from **`i8`** type.
+Another difference: unlike C and C++ where `char` is just a small (8-bit) integer type, rust separates the two, in rust the type for characters is **`char`** and this is different from **`i8`** type.
 
 Rust’s `char` type is **four bytes** in size and represents a Unicode Scalar Value.
 
 # **Compound Types**
 
 Compound types can **group multiple values into one type**. Rust has two 
-primitive compound types: tuples and arrays, both of these types allocate
-elements **on stack**, so by default their size cannot grow.
+primitive compound types: tuples and arrays, both of these types store their
+elements **inline** (e.g. on the stack when used as local variables, no separate heap allocation), and their size is fixed, so they cannot grow.
 
 # **Tuples**
 
@@ -107,7 +107,7 @@ let tup: (i32, f64, u8) = (500, 6.4, 1);
 let tup = (300u32, 32.43f64, 255u64);
 ```
 
-**Initializing** without type annotation and other specifiers, this will just promt the tuple to take the default type of the literals `500` as `i32`, `64.4` as double and `1` as `i32` (for x86-64 bit systems).
+**Initializing** without type annotation and other specifiers, this will just prompt the tuple to take the default type of the literals: `500` as `i32`, `6.4` as `f64` and `1` as `i32` (these defaults are the same on every platform).
 ```rust
 let tup = (500, 6.4, 1);
 ```
@@ -147,13 +147,13 @@ Arrays are useful when you want your data allocated on the stack rather than the
 let arr = [1.0f32, 2f32, 3.3f32, 4f32, 5f32];
 ```
 
-**Initializing with type annotations**, _type annotation format_ : `[type, size]`
+**Initializing with type annotations**, _type annotation format_ : `[type; size]`
 
 ```rust
 let arr : [u32; 5] = [1, 2, 3, 4, 5];
 ```
 
-**Initializing all index with one value**, _type annotation format_ : `[value, size]`
+**Initializing all elements with one value**, _format_ : `[value; size]`
 
 ```rust
 let arr = [-9i64; 7];
@@ -177,8 +177,8 @@ Though by default, we can only pass a type `usize` into it, unlike other program
 
 ### **Bounds Checking**
 
-**In C/C++** we use the flag `-fsanitize=address` as a **dynamic analysis** tool in out unit tests or CI, to check if there is a stack or heap buffer overflow that occurred when indexing through  arrays.
+**In C/C++** we use the flag `-fsanitize=address` as a **dynamic analysis** tool in our unit tests or CI, to check if there is a stack or heap buffer overflow that occurred when indexing through  arrays.
 
 We can also implement an array type container/class that has its own internal bound checking functionality, this could be achieved by overloading the `operator[](size_t) {}`.
 
-On the other hand, **In Rust** this bound checking is already built in, **Rust** checks the given index if it is greater than the length of an array and stops the program when an overflow occurs, no need to use a compiler flag, and/or no need to implement your own bound checking.
+On the other hand, **In Rust** this bound checking is already built in, **Rust** checks if the given index is greater than or equal to the length of an array and **panics** (stops the program) when an out-of-bounds access occurs, no need to use a compiler flag, and/or no need to implement your own bound checking. (Use `.get(index)` if you want an `Option` instead of a panic.)

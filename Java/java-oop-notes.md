@@ -13,7 +13,7 @@ Difference between abstract class and interface:
 
 
 2. Method implementation:
-	- In an **Abstract Class**, some methods can be implemented, while others are left abstract, meaning that they have no implementation and/ must be overridden by concrete subclasses.
+	- In an **Abstract Class**, some methods can be implemented, while others are left abstract, meaning that they have no implementation and must be overridden by concrete subclasses.
 
 		```java
 		abstract class Shape {
@@ -34,7 +34,7 @@ Difference between abstract class and interface:
 		}
 		```
 
-	- In contrast, all _methods_ in an **Interface** are by _default abstract_ and must be implemented by any class that implements the interface.
+	- In contrast, _methods_ in an **Interface** are _abstract by default_ and must be implemented by any class that implements the interface. Since **Java 8**, interfaces can also have `default` methods (with a body, which implementing classes may override) and `static` methods, and since **Java 9** `private` methods.
 
 		```java
 		public interface Relatable {
@@ -56,10 +56,10 @@ Difference between abstract class and interface:
 
 4. Access modifiers:
 	- **Abstract Classes** can have access modifiers such as public, protected, and private for their methods and properties.
-	- While **Interfaces** can only have public access.
+	- While **Interface** members are implicitly `public` (since Java 9, interfaces can also have `private` methods, used as helpers for `default` methods).
 
 5. Variables:
-	An Abstract Class can have member variables, while an interface cannot.
+	An Abstract Class can have instance member variables (with any access modifier), while an interface can only have constants (fields are implicitly `public static final`).
 
 6. Rules:
 	- **Abstract Class**
@@ -69,9 +69,9 @@ Difference between abstract class and interface:
 		4. There can be a `final` method in `abstract class` but any `abstract method` in class(`abstract class`) can not be declared as `final`  or in simpler terms `final` method can not be abstract itself as it will yield an error: “Illegal combination of modifiers: abstract and `final`”
 		5. We can define `static` methods in an `abstract class`
 		6. We can use the `abstract` keyword for declaring top-level classes (Outer class) as well as inner classes as abstract
-		7. If a class contains at least one `abstract method` then compulsory should declare a class as abstract 
+		7. If a class contains at least one `abstract method` then the class must be declared as `abstract`
 		8. If the **Child class** is unable to provide **implementation** to all `abstract method`s of the **Parent class** then we should declare that **Child class** as `abstract` so that the next level **Child class** should provide **implementation** to the remaining `abstract method`
 
-In summary, Abstract Classes are used to provide a base class for concrete subclasses to inherit from, while interfaces are used to define a set of methods that a class must implement. Abstract Classes can have implemented and abstract methods, while interfaces can only have abstract methods. Classes can inherit from only one Abstract Class, but can implement multiple interfaces.
+In summary, Abstract Classes are used to provide a base class for concrete subclasses to inherit from, while interfaces are used to define a set of methods that a class must implement. Abstract Classes can have implemented and abstract methods plus instance state, while interfaces mostly contain abstract methods (plus `default`/`static`/`private` methods since Java 8/9, but no instance state). Classes can inherit from only one Abstract Class, but can implement multiple interfaces.
 
-As we know that abstraction refers to hiding the internal implementation of the feature and only showing the functionality to the users. i.e. showing only the required features, and hiding how those features are implemented behind the scene. Whereas, an Interface is another way to achieve abstraction in java. Both Abstract Class and interface are used for abstraction, henceforth Interface and Abstract Class are required prerequisites.
+Abstraction refers to hiding the internal implementation of a feature and only showing its functionality to the users, i.e. showing only the required features and hiding how those features are implemented behind the scenes. Both Abstract Classes and Interfaces are ways to achieve abstraction in Java, so understanding both is a prerequisite for designing good abstractions.

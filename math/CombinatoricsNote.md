@@ -2,33 +2,33 @@
 
 ## Sum of Geometric Series
 
-a sequence of numbers where the ratio between any two consecutive numbers is constant. For example, $3,6,12,24$ is a geometric progression with a constant $k = 2$, its first term is $a = 3$ and $b = 24$ is the last term.
+a sequence of numbers where the ratio between any two consecutive numbers is constant. For example, $3,6,12,24$ is a geometric progression with a common ratio $k = 2$, its first term is $a = 3$ and $b = 24$ is the last term.
 
 $$
-s = a + ak + ak^2 + ak^3 + ... + b = \frac{bk - a}{k - 1}
+s = a + ak + ak^2 + ak^3 + ... + b = \frac{bk - a}{k - 1}, \quad (k \neq 1)
 $$
 
 ## Total Vertices Of A Perfect K-Ary/N-Ary Tree
 
-K-ary or N-ary trees is where each node has a maximum of $k$ children, it generalizes binary trees ($k = 2$), ternary trees ($k = 3$), etc.
+A K-ary or N-ary tree is a tree where each node has a maximum of $k$ children, it generalizes binary trees ($k = 2$), ternary trees ($k = 3$), etc.
 
-A **perfect** k-ary tree is where all the nodes starting from the root up to the nodes at $d - 1$ depth have a fixed number of $k$ child nodes, only until $d - 1$ since the nodes at depth $d$ does not have children since they are the leaf nodes, we can use the formula below to determine the total vertices a perfect k-ary tree has.
+A **perfect** k-ary tree is where all the nodes starting from the root up to the nodes at $d - 1$ depth have a fixed number of $k$ child nodes, only until $d - 1$ because the nodes at depth $d$ do not have children since they are the leaf nodes, we can use the formula below to determine the total vertices a perfect k-ary tree has.
 
 $$
 v = \frac{k^d - 1}{k - 1}, \quad (k \gt 1 \quad \land \quad d \ge 0)
 $$
 
-**NOTE**: some textbook might say that the root node is at depth 0, or count the depth via the number of edges going from the root to a specific node, but for this example we define the root node being at depth 1, and any of its children would be at depth 2, so on and so forth.
+**NOTE**: some textbooks might say that the root node is at depth 0, or count the depth via the number of edges going from the root to a specific node, but for this example we define the root node being at depth 1, and any of its children would be at depth 2, so on and so forth.
 
-This formula of finding the total number of vertices/node a perfect k-ary tree (with depth $d$) came from the geometic series.
+This formula for finding the total number of vertices/nodes of a perfect k-ary tree (with depth $d$) comes from the geometric series (level $i$ has $k^{i-1}$ nodes, so there is one term per level and the number of terms is $m = d$).
 
 $$
 \begin{align}
 v &= \dfrac{bk - a}{k - 1} \\
-&& \text{in the geometric serires } a, ak^2, ak^3, ..., b \\
+&& \text{in the geometric series } a, ak, ak^2, ..., b \\
 && \text{if there are } m \text{ terms, } \\
 && \text{we could say that the last term } b = ak^{m-1} \\
-&& \text{and if we substitue it to } b \text{ we would get} \\
+&& \text{and if we substitute it for } b \text{ we would get} \\
 v &= \dfrac{(ak^{m-1})k - a}{k - 1} \\
 && \text{simplify } (ak^{m-1})k \text{ via exponential rule} \\
 v &= \dfrac{ak^m - a}{k - 1} \\
@@ -39,6 +39,8 @@ v &= \dfrac{a(k^m - 1)}{k - 1} \\
 && \text{therefore } a = 1 \\
 v &= \dfrac{1(k^m - 1)}{k - 1} \\
 v &= \dfrac{k^m - 1}{k - 1} \\
+&& \text{and since } m = d \\
+v &= \dfrac{k^d - 1}{k - 1} \\
 \end{align}
 $$
 
@@ -46,13 +48,13 @@ $$
 
 The n-th triangular number is the shortcut of the **summation of incrementing numbers** starting from $1$ up to $n$ (eg: $1 + 2 + 3 + ... + n$).
 
-We can also use the N-th triangular number to **find the total number of sub-arrays** since there are $n$ subarrays of length $1$, there are $n - 1$ subarrays of length $2$... so on and so fort, as we can see this is similar to the incrementing number sequence so we can use the N-th triangular number to find the total number of sub-arrays too.
+We can also use the N-th triangular number to **find the total number of sub-arrays** since there are $n$ subarrays of length $1$, there are $n - 1$ subarrays of length $2$... so on and so forth, as we can see this is similar to the incrementing number sequence so we can use the N-th triangular number to find the total number of sub-arrays too.
 
 $$
 s = \frac{n(n+1)}{2}
 $$
 
-Another nice application of n-th triangular number: Given ($n$) players in a chess tournament (or any 1v1 game) in a round-robin format (each players need to play against all other players), we can find the total ($m$) number of games or total matchups using the n-th triangular number **but we need to subtract $1$ to $n$** first because a player cannot play against itself.
+Another nice application of n-th triangular number: Given ($n$) players in a chess tournament (or any 1v1 game) in a round-robin format (each player needs to play against all other players), we can find the total ($m$) number of games or total matchups using the n-th triangular number **but we need to subtract $1$ from $n$** first because a player cannot play against itself.
 
 $$
 \begin{align}
@@ -74,7 +76,7 @@ $$
 m = \frac{n(a+b)}{2}
 $$
 
-where $a$ is the starting number, $b$ is the lasat number and $n$ is the total count of the given numbers, if we look at the summation formula in the n-th triangular number, in the $(n + 1)$, the number $1$ is the starting number and $n$ is the last number too.
+where $a$ is the starting number, $b$ is the last number and $n$ is the total count of the given numbers, if we look at the summation formula in the n-th triangular number, in the $(n + 1)$, the number $1$ is the starting number and $n$ is the last number too.
 
 ## Total Number of Subset
 
@@ -102,7 +104,7 @@ Consider the following scenario, there are 5 different kinds of fruit and 3 boxe
 You are tasked to find out how many ways you can put one fruit (you can choose) in each of the boxes (there are only one fruit per kind, so you cannot repeat putting apples in multiple boxes), to get the total ways to do it you can use the permutation formula below
 
 $$
-n^P r = P(n,r)=\frac{n!}{(n-r)!},\quad(0\le r\le n).
+{}^{n}P_{r} = P(n,r)=\frac{n!}{(n-r)!},\quad(0\le r\le n).
 $$
 
 ### Combination - order does not matter (unordered).
@@ -112,12 +114,14 @@ holds which fruit, for example, (Box1: apple, Box2: orange, Box3: mango) is iden
 to get the total number of ways, you can use the combination formula below.
 
 $$
-n^C r = C(n,r)=\frac{n!}{(n-r)! \cdot r!},\quad(0\le r\le n).
+{}^{n}C_{r} = C(n,r)=\frac{n!}{(n-r)! \cdot r!},\quad(0\le r\le n).
 $$
 
 **NOTE:** in some sources $k$ is used instead of $r$.
 
 ## Finding all possible number of pairs from the elements of set A & B (order DOES NOT matter)
+
+(these formulas assume the sets are disjoint, i.e. they don't share elements)
 
 ```py
 A = { a, b }, B = { c }
@@ -139,7 +143,7 @@ $$
 n = 2! \cdot (|A| \cdot |B|)
 $$
 
-**NOTE:** If you have 3 sets and you want to get the total number of possible tripples, then the formula would look like this.
+**NOTE:** If you have 3 sets and you want to get the total number of possible ordered triples, then the formula would look like this.
 
 $$
 n = 3! \cdot (|A| \cdot |B| \cdot |C|)
@@ -148,7 +152,7 @@ $$
 Notice that you could extend it to multiple sets using the same idea.
 
 $$
-n = s! \cdot (\prod_{i=1}^{n} |S_i|)
+n = s! \cdot (\prod_{i=1}^{s} |S_i|)
 $$
 
 Here the $s$ is the number of sets, $S_i$ is a set we get when we iterate over all of the sets, and for $|S_i|$ we just get the size/cardinality of the current set during iteration.
@@ -182,7 +186,7 @@ $$
 **Question.** Given a sequence of (n) elements that may include repeated values, how many distinct sequential arrangements (permutations) are possible?
 
 **Answer:**
-Say the sequence contains $(k)$ distinct symbols and the multiplicities (counts) of each symbols are represented by each elements of the vector $M$, where $(|M| = k)$.
+Say the sequence contains $(k)$ distinct symbols and the multiplicities (counts) of each symbol are represented by the elements of the vector $M$, where $(|M| = k)$.
 
 $$
 M_1,M_2,\dots,M_k,\quad(\sum_{i=1}^k M_i = n)
@@ -194,7 +198,7 @@ $$
 P=\dfrac{n!}{M_1! M_2! \cdots M_k!}
 $$
 
-Here, division to $M_1! M_2! \cdots M_k!$ corrects for the overcounting caused by swapping identical items of symbol.
+Here, dividing by $M_1! M_2! \cdots M_k!$ corrects for the overcounting caused by swapping identical items of the same symbol.
 
 **Example:** sequence `AABCC`.
 
@@ -213,9 +217,17 @@ $$
 
 **Example:** for base 10 $(B=10)$ and $(n=2)$ digits, there are $C = 10^2 = 100$, possible sequences, namely `00` through `99`.
 
-**Note:** There might be tricky questions that disguise itself as a **set** type of question but they are **not**, for example; when given a set $Y = \\{ a, b, c \\}$, and you're task to find the total number of subsets with cardinality $2$ and such that the elements of the sets can be repeated in the subsets, don't be tricked because this is still the solution to that, each of the elements in the set can be considered as the digit and the cardinality of the set is the base $B$ and the specific cardinality for all of the subsets you're finding is $n$.
+**Note:** There might be tricky questions that disguise themselves as a **set** type of question but they are **not**. For example, given a set $Y = \\{ a, b, c \\}$, if you're tasked to find the total number of **ordered** selections (sequences) of length $2$ where elements can be repeated, this is the same problem: each element of the set can be considered as a digit, the cardinality of the set is the base $B$, and the length is $n$, so the answer is $3^2 = 9$ (`aa, ab, ac, ba, bb, bc, ca, cb, cc`).
 
-If when digits cannot repeat and $(n \le B)$, the count is the permutation of $(B)$ taken $(n)$ at a time:
+But be careful: if the order does **not** matter (e.g. `ab` and `ba` count as the same selection, i.e. multisets / combinations with repetition), $B^n$ over-counts. The correct count is:
+
+$$
+\binom{B + n - 1}{n}
+$$
+
+For the same example, $\binom{3 + 2 - 1}{2} = \binom{4}{2} = 6$ (`aa, bb, cc, ab, ac, bc`).
+
+If digits cannot repeat and $(n \le B)$, the count is the permutation of $(B)$ taken $(n)$ at a time:
 
 $$
 P(B,n)=\frac{B!}{(B-n)!}.

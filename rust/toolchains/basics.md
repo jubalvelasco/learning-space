@@ -1,8 +1,8 @@
 # Rustlang Notes
 
-### **Installation rustup on Linux or MacOS**
+### **Installing rustup on Linux or MacOS**
 
-I would suggest to find the link in the official rust website since this one command given below might be subjected to changes in the future.
+I suggest getting the command from the official rust website since the command given below might be subject to changes in the future.
 
 ```
 $ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
@@ -43,14 +43,14 @@ cd project_name
 
 Compiles the code.
 
-Creates the `Cargo.lock,` same with `npm install` that creates a `package.json.lock` file.
+Creates the `Cargo.lock` file, similar to how `npm install` creates a `package-lock.json` file.
 
 by default produces a **debug build**, to enable
 optimizations add the **`--release`** flag.
 
 ```
 cargo build
-./target/debug/project_name // run manually
+./target/debug/project_name # run manually
 ```
 
 ### **Build and Run - method 2**
@@ -63,10 +63,10 @@ cargo run
 
 ### **Cargo File Tracking**
 
-The `cargo build` and `cargo run` command works
+The `cargo build` and `cargo run` commands work
 like **makefiles**, similar to C and C++ where
-if we run the `make` command, the changed sources
-are the only one that will be recompiled.
+if we run the `make` command, only the changed sources
+are recompiled (cargo recompiles the crates that changed, dependencies are not rebuilt).
 
 ### **Cargo Compile Time Check**
 
@@ -115,7 +115,7 @@ cargo doc --open
 
 ### **Cargo format your rust code**
 
-Fix the format of your rust code using the following command, this will format all the rust code that you use in your `main.rs` file.
+Fix the format of your rust code using the following command, this will format all the rust source files of the crates in your package (not just `main.rs`).
 
 ```bash
 cargo fmt -v

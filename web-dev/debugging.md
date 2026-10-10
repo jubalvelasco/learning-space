@@ -17,7 +17,7 @@
 
 1. Open Developer Mode
 2. Select an HTML element to find its event handler function
-3. In the sub-window with `Stlyes` tab, change tab to `Event Listeners`
+3. In the sub-window with `Styles` tab, change tab to `Event Listeners`
 4. uncheck the checkbox `Ancestors`
 5. check the checkbox `Framework listeners`
 6. It should show the event handler of the selected element

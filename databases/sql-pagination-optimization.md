@@ -85,7 +85,13 @@ ORDER BY created_at DESC, id DESC
 LIMIT 20;
 ```
 
-**When to use it:** use keyset pagination when you need fast, stable paging over large or changing datasets. It avoids large offsets and usually performs much better for deep pages.
+In PostgreSQL and MySQL/MariaDB the same condition can be written more compactly with a row value comparison (PostgreSQL can use the `(created_at, id)` index directly for this form):
+
+```sql
+WHERE (created_at, id) < ('2026-03-24 10:00:00', 12345)
+```
+
+**When to use it:** use keyset pagination when you need fast, stable paging over large or changing datasets. It avoids large offsets and usually performs much better for deep pages. The ordering columns must be unique together (that's why `id` is added as a tie-breaker), otherwise rows with the same `created_at` could be skipped or repeated.
 
 ## 4) Indexing to speed things up
 
@@ -104,6 +110,8 @@ CREATE INDEX idx_posts_created_at_id_desc ON posts (created_at DESC, id DESC);
 ```
 
 For keyset pagination, this kind of index is especially helpful because the database can jump directly to the cursor position and continue reading in order.
+
+NOTE: a B-tree index can also be scanned backwards, so a plain ascending index `(created_at, id)` works for `ORDER BY created_at DESC, id DESC` too. The `DESC` in the index definition only matters when the columns are ordered in mixed directions (e.g. `ORDER BY created_at DESC, id ASC`).
 
 ## Which method fits which navigation style?
 

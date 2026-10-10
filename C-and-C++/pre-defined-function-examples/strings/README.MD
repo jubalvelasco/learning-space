@@ -17,9 +17,9 @@
 ```c++
   #include <reader.hpp>
 
-  std::string     wholetext = read::all("filename.txt");
-  std::vector<string> lines = read::lines("filename.txt");
-  std::vector<string> words = read::words("filename.txt");
+  std::string          wholetext = read::all("filename.txt");
+  std::vector<std::string> lines = read::lines("filename.txt");
+  std::vector<std::string> words = read::words("filename.txt");
 ```
 
 ---------------------------------------------------------------

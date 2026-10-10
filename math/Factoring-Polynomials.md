@@ -2,9 +2,10 @@
 
 ## **Difference of Square**
 
-Use to factor a **quadratic binomial** equation
-in the form of ($a^2-c^2$) where each term could be
-of any degree **less-than or equal degree 2**.
+Use to factor a **binomial** in the form of ($a^2-c^2$),
+where both terms are perfect squares. The terms can be
+of any even degree, not just degree 2
+(e.g. $x^4 - 9 = (x^2 + 3)(x^2 - 3)$).
 
 $$
 a^2 - c^2 = (a + c)(a - c)
@@ -30,11 +31,11 @@ $$
 \end{align}
 $$
 
-## **Difference of Square for non-prefect square binomials**
+## **Difference of Square for non-perfect square binomials**
 
-To factor out difference of square with non-prefect 
-square terms, we need to factor out a term/constant
-where the inner binomial terms have will have
+To factor a difference of squares with non-perfect
+square terms, we need to factor out a common term/constant
+so that the inner binomial will have
 perfect square terms.
 
 **Example**

@@ -4,11 +4,11 @@ The "Gang of Four" book, also known as "Design Patterns: Elements of Reusable Ob
 
 Published in 1994, this book has had a significant impact on software development practices. It introduces 23 design patterns, which are common solutions to recurring problems in software design. These patterns are categorized into three main groups:
 
-1. [**Creational Patterns**](design-patterns-gang-of-four/creational/creational.md): These patterns deal with the process of object creation, trying to make it more flexible and efficient. Examples include the Singleton, Factory Method, and Abstract Factory patterns.
+1. [**Creational Patterns**](creational/creational.md): These patterns deal with the process of object creation, trying to make it more flexible and efficient. Examples include the Singleton, Factory Method, and Abstract Factory patterns.
 
-2. [**Structural Patterns**](design-patterns-gang-of-four/structural/structural.md): These patterns focus on how objects are composed or structured to form larger structures. Examples include the Adapter, Composite, and Proxy patterns.
+2. [**Structural Patterns**](structural/structural.md): These patterns focus on how objects are composed or structured to form larger structures. Examples include the Adapter, Composite, and Proxy patterns.
 
-3. [**Behavioral Patterns**](design-patterns-gang-of-four/behavioral/behavioral.md): Behavioral patterns are concerned with communication between objects, how they operate together, and how responsibilities are assigned. Examples include the Observer, Strategy, and Command patterns.
+3. [**Behavioral Patterns**](behavioral/behavioral.md): Behavioral patterns are concerned with communication between objects, how they operate together, and how responsibilities are assigned. Examples include the Observer, Strategy, and Command patterns.
 
 The book provides in-depth explanations of each pattern, including their intent, motivation, structure, participants, and consequences. It also includes code examples in C++ and Smalltalk, although the patterns are applicable to a wide range of programming languages.
 

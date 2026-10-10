@@ -10,12 +10,14 @@
 - **Cache the next git user and password (in-memory)**
   
   ```bash
-  git config --global credential.helper cache --timeout=<seconds>
+  # the helper and its options must be quoted as one value
+  git config --global credential.helper 'cache --timeout=<seconds>'
   ```
  
 - **Cache the next git user and password (disk)**
   
   ```bash
+  # WARNING: credentials are saved in PLAIN TEXT in ~/.git-credentials
   git config --global credential.helper store
   ```
 
@@ -33,10 +35,11 @@
   git config --global --unset user.email
   ```
 
-- **Display Global Configs Variables**
+- **Display Config Variables**
   
   ```bash
-  git config -l
+  git config -l            # all configs (system + global + local repo)
+  git config --global -l   # global configs only
   ```
   
 - **Edit Git Global Config Variables**
@@ -59,7 +62,7 @@
   git branch
   ```
 
-- **Display all branch even on remote repository**
+- **Display all branches, including the remote-tracking branches**
   ```bash
   git branch -a
   ```
@@ -123,7 +126,7 @@
   ```
 ## Diffs
 
-- **Show changes in a commit
+- **Show changes in a commit**
 
 ```bash
 git show <commit-hash> --diff-merges=on
@@ -138,29 +141,27 @@ git diff
 - **Shows difference between two branches or commits**
 
 ```bash
-git diff A..B
+git diff A..B   # same as `git diff A B`: compares the two snapshots directly
 ```
 
-- **Shows difference between two branches or commits while respecting the history**
+- **Shows the changes made on `B` since it diverged from `A`**
 
 ```bash
-git diff A...B
+git diff A...B  # same as `git diff $(git merge-base A B) B`
 ```
 
 - **Difference of `..` and `...`**
 
-Since `A` is an older commit and `B` is a newer one, if we `diff` them with `..` and
-placed the `B` as the starting commit then `A` as the end commit, it will show the
-changes made as if `B` is the older commit then `A` is the newer one.
+In `git diff`, `A..B` simply compares the two snapshots `A` and `B`. If `A` is an older commit and `B` is a newer one
+and we swap them, it will show the changes reversed, as if `B` is the older commit and `A` is the newer one.
 
 ```bash
 git diff B..A
 ```
 
-On the other hand if we `diff` with `...` and placed `B` as the starting commit and `A`
-as the end commit, it will not show anything because `...` only shows the changes made
-while respecting the history, and since `B` to `A` has no connection then there is nothing
-to display (note: only `A` to `B` has a connection).
+On the other hand, `X...Y` compares `Y` against the **merge base** (common ancestor) of `X` and `Y`, i.e. it only shows the changes made on `Y`'s side since the two histories diverged.
+So if `A` is an ancestor of `B` (B was built on top of A), then `git diff B...A` shows nothing:
+the merge base of `B` and `A` is `A` itself, so it compares `A` with `A`. (`git diff A...B` would show the changes from `A` to `B`.)
 
 ```bash
 git diff B...A
@@ -177,9 +178,9 @@ git diff B...A
   
 - **Commit changes directly**
 
-  use for simple commits that only requires a commit message, and no further information
+  use for simple commits that only require a commit message, and no further information
   ```bash
-  git commit -m <the-commit-message>
+  git commit -m "<the-commit-message>"
   ```
   
 - **Go back to a certain commit (for specific files)**
@@ -211,14 +212,14 @@ git diff B...A
   ```bash
   git commit --amend
   git push --force-with-lease <remote-name> <branch-name>
-  // <remote-name> and <branch-name> are optional
+  # <remote-name> and <branch-name> are optional
   ```
 
 - **Edit the history of the next following commits after a selected base commit**
   
-  This will prompt an interactive shell where you can edit **all (up to `HEAD` commit)**
-  of the **following commits** after the chosen base commit, the shell will let you pick
-  which commits do you want to edit.
+  This will open an editor with a "todo list" where you can edit **all (up to `HEAD` commit)**
+  of the **following commits** after the chosen base commit, it will let you pick
+  which commits you want to edit (`pick`, `reword`, `edit`, `squash`, `fixup`, `drop`, ...).
 
   _the `<base-commit-hash>` is not included_
 
@@ -226,9 +227,9 @@ git diff B...A
   git rebase -i <base-commit-hash>
   ```
 
-  After entering the command above and picking the actions you want to do for each commits,
-  it will **reset** your files to the state of the **next** commit (`<next-commit-hash>`)
-  after the `<base-commit-hash>` that was given.
+  After entering the command above and picking the actions you want to do for each commit,
+  git replays the commits one by one, and for each commit marked as `edit` it **stops** right
+  after applying that commit, so your files are in the state of that commit (`<next-commit-hash>`).
 
   Now you can edit the `<next-commit-hash>` by amending changes in either
   or both the code or commit message (see amend section):
@@ -236,7 +237,7 @@ git diff B...A
   1. If you only edited the commit message you will not have any
      problems after using `git rebase --continue`.
      
-  2. But if you edited files or code during amending you might encounter (but not everytime)
+  2. But if you edited files or code during amending you might encounter (but not every time)
      conflicts after using `git rebase --continue` so you will need to fix it.
 
 - **Fixing conflict after `rebase --continue`**
@@ -258,10 +259,10 @@ git diff B...A
   ```
 
   At this point you need to edit the source code or files where the conflict happens, one
-  way to see the code where the conflict occured is by using `git diff` :
+  way to see the code where the conflict occurred is by using `git diff` :
 
   ```bash
-  git --diff
+  git diff
 
   # output
   
@@ -284,15 +285,19 @@ git diff B...A
   will be able to see the structure of the conflicting code in the section of the **incoming
   changes** `7928385 (Some Random Commit Message Of 7928385)` below the `++=======` line.
   Above it is the auto-merge's new **current changes** which are the conflicting code that
-  arised due to our amends earlier.
+  arose due to our amends earlier.
+
+  NOTE: during a rebase, "current" (`HEAD`) is the branch/commits you are rebasing **onto**
+  (including the commits already replayed), and "incoming" is **your** commit being replayed.
+  This is the opposite of a normal `git merge`, where "current" is your branch.
 
   Some IDE and Editors will have a quick button to either:
   
-  - `Accept Only The Current Changes` - (`+<<<<<<<`)
-  - `Accept Only The Incoming Changes` - (`++>>>>>>>`)
+  - `Accept Only The Current Changes` - (the part between `<<<<<<< HEAD` and `=======`)
+  - `Accept Only The Incoming Changes` - (the part between `=======` and `>>>>>>>`)
   - `Accept Both The Current and Incoming Changes`
 
-  But you can always edit it youself manually, for example:
+  But you can always edit it yourself manually, for example:
 
   **Opened From Text Editor: From:**
   
@@ -319,13 +324,13 @@ git diff B...A
   after committing `7928385`, or how you want the code to appear as
   the result of committing `7928385`.
 
-  After that just stage the fix-changes you applied.`
+  After that just stage the fix-changes you applied.
 
   ```bash
   git add .
   ```
 
-  Then after staging the fix-changes can continue the rebase step with:
+  Then after staging the fix-changes you can continue the rebase step with:
 
   ```bash
   git rebase --continue
@@ -342,19 +347,19 @@ git diff B...A
 ## Stages
 
 - **Stage (add) the new edited files**
-- 
+
   ```bash
   git add <files>...
   ```
 
 - **Unstage (remove) the added files when the git `add` command was used**
-- 
+
   ```bash
   git restore --staged <file>...
   ```
   
 - **Show staged file changes**
-- 
+
   ```bash
   git diff --cached
   ```
@@ -362,20 +367,20 @@ git diff B...A
 ## Remote
 
 - **Show remote repository `<remote-name>` and `<url>`**
-- 
+
   ```bash
   git remote
   git remote -v
   ```
 
 - **Add a remote repository**
-- 
+
   ```bash
   git remote add <remote-name> <url>
   ```
 
 - **Remove a remote repository**
-- 
+
   ```bash
   git remote remove <remote-name>
   ```
@@ -383,7 +388,7 @@ git diff B...A
 # Submodules
 
 - **add a submodule in a repo**
-- 
+
   ```bash
   git submodule add <url>
   ```
@@ -402,7 +407,7 @@ git diff B...A
 
 # Dot Character
 
-use to denote `<all files>` instead of just selecting a specific file name.
+`.` means the current directory (and everything inside it, recursively), so it is commonly used to denote `<all files>` instead of just selecting a specific file name.
 
 Example, to add all changes:
 
@@ -417,7 +422,7 @@ git add .
 
 - **Merge branch**
 
-  _This operation stacks the incoming feature branch commits on top of the existing commit history of the main branch._
+  _This operation joins the feature branch history into the main branch. If main has new commits too, git creates a new **merge commit** with two parents (both histories are kept as they are); if main has no new commits, git just **fast-forwards** main to the tip of the feature branch._
 
   ```bash
   git checkout <main-branch>
@@ -426,7 +431,7 @@ git add .
 
 - **Rebase branch**
 
-  _This operation temporarily removes the current feature branch commits, stacks the new incoming commits from the main branch on top of the feature branch history, and then restacks the current feature branch commits back._
+  _This operation temporarily sets aside the feature branch commits, moves the feature branch to the tip of the main branch, and then replays the feature branch commits on top of it. The replayed commits are **new commits** (with new hashes), so avoid rebasing commits that others have already pulled._
 
   ```bash
   git checkout <feature-branch>
@@ -456,10 +461,10 @@ git add .
 - **Create a local annotated tag**
 
   ```bash
-  git tag <tag-name> -a
+  git tag -a <tag-name> -m "<tag-message>"
   ```
 
-- **Push all local tag**
+- **Push all local tags**
 
   ```bash
   git push <remote-name> --tags
@@ -474,7 +479,7 @@ git add .
 - **Checkout a tag**
 
   ```bash
-  git checkout tags/<tag-name>
+  git checkout tags/<tag-name>   # this puts you in a "detached HEAD" state
   ```
 
 ## Stash
@@ -503,8 +508,8 @@ Reminder: [git stash is not branch specific](https://stackoverflow.com/questions
 
 - **Working with multiple stashes: Show Stash Stack**
   
-  _yes stashed changes is stored in a stack, the command
-  below will list all of the stashes along with it's index._
+  _yes stashed changes are stored in a stack, the command
+  below will list all of the stashes along with their index._
 
   ```bash
   git stash list
@@ -515,11 +520,11 @@ Reminder: [git stash is not branch specific](https://stackoverflow.com/questions
   ```bash
   git stash apply stash@{<stash-index-number>}
   git stash drop stash@{<stash-index-number>}
-  // or
+  # or
   git stash pop stash@{<stash-index-number>}
   ```
 
-- **Stash some specific file changes from another branch**
+- **Get specific file(s) from another branch (not a stash command, but often used similarly)**
   
   ```bash
   git checkout <main-branch>

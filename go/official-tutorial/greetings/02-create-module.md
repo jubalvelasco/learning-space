@@ -2,9 +2,9 @@
 
 In this tutorial you'll create two modules.
 
-- The first is a **library** which is intended to be imported by other libraries or applications, these types of Go programs uses the `package greetings` above the very first line of code.
+- The first is a **library** which is intended to be imported by other libraries or applications, these types of Go programs use a package name other than `main` (here `package greetings`) as the very first line of code.
 
-- The second is a caller **application** which will use the first, these types of Go programs uses the `package main` above the very first line of code.
+- The second is a caller **application** which will use the first, these types of Go programs use `package main` (with a `func main()`) as the very first line of code.
 
 
 Go code is grouped into packages, and packages are grouped into modules, example:
@@ -52,7 +52,7 @@ As you add or improve functionality in your module, you publish new versions of 
     }
     ```
 
-    - In go a function whose name starts with a capital letter is known as an **exported name**, these functions can be called by other go modules.
+    - In go a function (or any other identifier: type, variable, constant, struct field) whose name starts with a capital letter is known as an **exported name**, these can be used by code in other packages.
 
     - In Go, the `:=` operator is a shortcut for declaring and initializing a variable in one line (Go uses the value on the right to determine the variable's type). Taking the long way, you might have written this as:
 
@@ -68,4 +68,6 @@ _My question is does the form below not allowed in go? (look this up)_
 ```go
 var message = fmt.Sprintf("Hi, %v. Welcome!", name)
 ```
+
+_Answer: yes, it is allowed. With `var` you can omit the type when you give an initial value (the type is inferred, just like with `:=`). The difference is that `:=` can only be used inside functions, while `var` also works at package level._
 

@@ -31,7 +31,7 @@ where additional steps are needed to ensure you have the latest Clang version.
 
 ```bash
 # find all clang packages still installed
-apt list --installed | grep llvm
+apt list --installed | grep clang
 
 # find all llvm packages still installed
 apt list --installed | grep llvm
@@ -44,7 +44,7 @@ apt list --installed | grep llvm
 # in entering `Y` (yes), read carefully.
 sudo apt-get purge <clang-or-llvm-packages>
 
-# I would suggest to don't use wildcard character (`*`) when purging
+# I suggest not using the wildcard character (`*`) when purging
 
 # Example:
 sudo apt-get purge llvm-3.2 clang-3.2
@@ -139,7 +139,7 @@ sudo ln -s /usr/lib/llvm-19/bin/clangd /usr/bin/clangd
 ```
 
 
-### Restart the PC, then verify the installation
+### Open a new terminal (or run `hash -r` to clear the shell's cached command paths), then verify the installation
 
 ```bash
 clang --version

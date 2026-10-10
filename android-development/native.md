@@ -26,7 +26,7 @@
 3. In Project tab > **Project > app > src > main > Right-Click >
 New > Directory :** `cpp`
 
-4. **cpp > Right-Click > New > File :** CMakeList.txt
+4. **cpp > Right-Click > New > File :** CMakeLists.txt
 
     ```cmake
     cmake_minimum_required(VERSION 3.22.1)
@@ -77,7 +77,7 @@ New > Directory :** `cpp`
 
     - You can select the defined function name and press
     `Alt + Enter > "Create JNI function ..."` and let the
-    android studio to automatically declare the C++ function
+    android studio automatically declare the C++ function
     signature for you.
 
     - Or you can define it manually following this format:
@@ -95,9 +95,9 @@ New > Directory :** `cpp`
         }
         ```
 
-    - **PackageName** was the directory where the Activity Class is
-    located, usually this is `com.example.APP_NAME` so in this case
-    the package name would be `_com_example_APP_NAME`
+    - **PackageName** is the Java package of the Activity Class,
+    usually this is `com.example.APP_NAME`, the dots are replaced by underscores, so in this case
+    the function name would start with `Java_com_example_APP_NAME_` (an actual underscore `_` in a name is escaped as `_1`)
 
     - **ClassName** is the Activity Class where you defined the
     native function definition, usually this is `MainActivity`.
@@ -119,7 +119,9 @@ New > Directory :** `cpp`
 | `double`   | `jdouble`      | `double`       | D          |
 | `void`     | `void`         | `void`         | V          |
 
-Signature of objects - `Ljava_lang_ClassName_2`
+Signature of objects - `Ljava/lang/ClassName;` (e.g. `Ljava/lang/String;`), and arrays are prefixed with `[` (e.g. `[I` for `int[]`).
+
+When an object signature is used inside a **native function name** (for overloads, see below), it is mangled: `/` becomes `_` and `;` becomes `_2`, e.g. `Ljava_lang_String_2`.
 
 ## **Overloading native methods**
 
@@ -136,12 +138,13 @@ methods properly.
     Format: `Java_PackageName_ClassName_MethodName__MethodParamType1MethodParamType2...MethodParamTypeN`
 
     ```c++
+    // Java: private native ReturnType MethodName(int a, double b);
     extern "C" JNIEXPORT jreturn_type JNICALL
     Java_com_example_MainActivity_MethodName__ID(
         JNIEnv* env,
         jobject thiz,
-        jarg_type_if_there_is_one arg,
-        jint a, jdouble
+        jint a,
+        jdouble b
     ) {
         // Function Code
     }
@@ -152,7 +155,7 @@ methods properly.
 There is **no problem** when you **return the corresponding C++ types**
 to their JNI counterpart, but this is **only true for primitive types**.
 
-**For arrays** its quiet different, we need to **use the `JNIEnv* env`**
+**For arrays** it's quite different, we need to **use the `JNIEnv* env`**
 to **convert or set our arrays** into an array that the java can process.
 
 
@@ -322,10 +325,10 @@ void Get<PrimitiveType>ArrayRegion(JNIEnv *env, ArrayType array, jsize start, js
 | `Boolean`     | `jbooleanArray` | `jboolean` |
 | `Byte`        | `jbyteArray`    | `jbyte`    |
 | `Char`        | `jcharArray`    | `jchar`    |
-| `Short`       | `jshortArray`   | `jhort`    |
+| `Short`       | `jshortArray`   | `jshort`   |
 | `Int`         | `jintArray`     | `jint`     |
 | `Long`        | `jlongArray`    | `jlong`    |
-| `Float`       | `jfloatArray`   | `jloat`    |
+| `Float`       | `jfloatArray`   | `jfloat`   |
 | `Double`      | `jdoubleArray`  | `jdouble`  |
 
 A family of functions that copies a region of a primitive array into a buffer.
@@ -377,6 +380,9 @@ private native int[][] transpose(int[][] array2D, int row, int column);
 **C++**
 
 ```c++
+#include <jni.h>
+#include <vector>
+
 extern "C" JNIEXPORT jobjectArray JNICALL Java_com_example_nativeapp_MainActivity_transpose(
         JNIEnv *env,
         jobject,
@@ -394,7 +400,7 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_example_nativeapp_MainActivit
         // get the `jintArray` row at index `i` of the `jobjectArray arr`, push it to a vector
         original_rows.push_back((jintArray) env->GetObjectArrayElement(arr, i));
 
-        // create a copy/reference buffer of the aquired `jintArray`
+        // create a copy/reference buffer of the acquired `jintArray`
         row_elements[i] = env->GetIntArrayElements(original_rows.back(), nullptr);
     }
 
@@ -420,11 +426,17 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_example_nativeapp_MainActivit
 
         // add the row jintArray to the main jobjectArray transpose matrix
         env->SetObjectArrayElement(transposed, i, curr_row);
+
+        // free the local reference (the array is still referenced by `transposed`),
+        // so we don't overflow the local reference table on big matrices
+        env->DeleteLocalRef(curr_row);
     }
 
     // release the copy/reference buffers of the original rows that we got from the first loop
+    // (JNI_ABORT: we didn't modify them, so there is no need to copy anything back)
     for (jsize i = 0; i < row; ++i) {
-        env->ReleaseIntArrayElements(original_rows[i], row_elements[i], 0);
+        env->ReleaseIntArrayElements(original_rows[i], row_elements[i], JNI_ABORT);
+        env->DeleteLocalRef(original_rows[i]);
     }
 
     // deallocate all of the C++ array that we allocated using C++ convention
@@ -469,6 +481,8 @@ extern "C" JNIEXPORT jintArray JNICALL Java_com_example_nativeapp_MainActivity_r
     // free the C array and apply the changes back to the `arr`
     env->ReleaseIntArrayElements(arr, reverse_array, 0);
 
+    // NOTE: this reverses the Java array that was passed in (in-place),
+    // and returns the same array object
     return arr;
 }
 ```

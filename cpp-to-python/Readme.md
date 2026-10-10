@@ -1,1 +1,1 @@
-# Shows different example to call C/C++ code to python
+# Shows different examples of calling C/C++ code from python

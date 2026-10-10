@@ -7,11 +7,11 @@ in a node program
     - it can also use the ```exports``` (note the 's') to export module objects/variables
     - what nodejs uses by default
 
-- ES6 JS - this is added in node.js v13 to support ES6 syntax way of
+- ES6 JS (ES modules / ESM) - this was added (without an experimental flag) in node.js v13.2 / v12.17 to support the ES6 syntax way of
 importing ES6 modules
     - uses the ```import``` to import modules
-    - uses the ```export``` to export modul object/variables
-    - can be used on javascript main.js program with javascript module files that has ```.mjs``` as their extension
+    - uses the ```export``` to export module objects/variables
+    - can be used in files that have ```.mjs``` as their extension, or in `.js` files when the nearest `package.json` has `"type": "module"` (see below)
 
 The two module systems are not fully compatible, so this is somewhat tricky to do.
 
@@ -50,10 +50,13 @@ This package.json trick only becomes necessary if you want to use ES6 modules wi
 
 -----
 
-## ES6 module can load CommonJS module, but not the other way around
+## ES6 module can load CommonJS module, but not (easily) the other way around
 
 Because there is an enormous amount of existing Node code written
 using CommonJS module format, Node allows ES6 modules to load
-CommonJS modules using the import keyword. The reverse is not
-true, however: a CommonJS module cannot use require() to load
-an ES6 module.
+CommonJS modules using the import keyword. The reverse was not
+true for a long time, however: a CommonJS module could not use require() to load
+an ES6 module, it had to use the asynchronous dynamic `import()` function instead.
+
+**Update:** newer Node.js versions (v22.12+, and v20.19+) **can** `require()` an ES module,
+as long as that module (and its dependencies) doesn't use top-level `await`.

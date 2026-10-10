@@ -25,50 +25,46 @@ asm asm-qualifiers (
 
 [GCC Inline Assembly Syntax - reference](https://www.codeproject.com/Articles/15971/Using-Inline-Assembly-in-C-C)
 
-Assembly language appears in two flavors: Intel Style & AT&T style. GNU C compiler i.e. GCC uses AT&T syntax and this is what we would use. Let us look at some of the major differences of this style as against the Intel Style.
+Assembly language appears in two flavors: Intel Style & AT&T style. GNU C compiler i.e. GCC uses AT&T syntax by default and this is what we would use (Intel syntax can be enabled with `-masm=intel`). Let us look at some of the major differences of this style as against the Intel Style.
 
 1. **Register Naming**: Register names are prefixed with **```%```**, so that registers are **```%eax```**, **```%cl```** etc, instead of just **```eax```**, **```cl```**.
 2. **Ordering of operands**: Unlike **Intel** convention (first operand is destination), the order of operands is source(s) first, and destination last. For example, Intel syntax **"```mov eax, edx```"** will look like **"```mov %edx, %eax```"** in **AT&T** assembly.
-3. **Operand Size**: In AT&T syntax, the size of memory operands is determined from the last character of the op-code name. The suffix is **```b```** for **(8-bit)** byte, **```w```** for **(16-bit)** word, and **```l```** for **(32-bit)** long. For example, the correct syntax for the above instruction would have been **"```movl %edx, %eax```"**.
+3. **Operand Size**: In AT&T syntax, the size of memory operands is determined from the last character of the op-code name. The suffix is **```b```** for **(8-bit)** byte, **```w```** for **(16-bit)** word, **```l```** for **(32-bit)** long, and **```q```** for **(64-bit)** quad. For example, the fully explicit syntax for the above instruction would be **"```movl %edx, %eax```"** (the suffix can be omitted when a register operand already determines the size, but it is required when it is ambiguous, e.g. an immediate stored to memory).
 4. **Immediate Operand**: Immediate operands are marked with a **```$```** prefix, as in **"```addl $5, %eax```"**, which means add immediate long value 5 to register %eax.
 5. **Memory Operands:** Missing operand prefix indicates it is a memory-address; hence **"```movl $bar, %ebx```"** puts the **address** of variable bar into register %ebx, but **"```movl bar, %ebx```"** puts the **contents/value** of variable bar into register %ebx.
-6. **Indexing:** Indexing or indirection is done by enclosing the index register or indirection memory cell address in parentheses. For example, **"```movl 8(%ebx), %eax```"** (moves the contents at offset 8 bytes from the cell pointed to by %ebx into register %eax.
+6. **Indexing:** Indexing or indirection is done by enclosing the index register or indirection memory cell address in parentheses. For example, **"```movl 8(%ebx), %eax```"** moves the contents at offset 8 bytes from the cell pointed to by %ebx into register %eax.
 
 -----
 
 ## asm-qualifiers
-- **volatile** - disables certain optimizations. See Volatile.
+- **volatile** - disables certain optimizations: the compiler will not delete the asm statement (e.g. when its outputs are unused), move it out of loops, or merge identical asm statements. asm statements without output operands are implicitly volatile.
 - **inline** - If you use the inline qualifier, then for inlining purposes the size of the asm statement is taken as the smallest size possible.
 - **goto** - This qualifier informs the compiler that the asm statement may perform a jump to one of the labels listed in the GotoLabels.
 
 ## asm() parameters
 - **AssemblerTemplate** - This is a literal string that is the template for the assembler code. The compiler replaces tokens in the template that refer to inputs, outputs, and goto labels, and then outputs the resulting string to the assembler. Below are special string formats you can use inside the assembler template.
     - **$immediate_value** - use to represent a number value in your assembler template.
-    - **%zero_base_index** - are the operands to **represent/access** the **outputs** and **inputs** _inside an assembler template_. Say for example you have 2 outputs and 2 inputs in you inline assembly like the given code below, you can access them in the assembler template using format % followed by the index of the operand in your input or output
+    - **%zero_base_index** - are the operands to **represent/access** the **outputs** and **inputs** _inside an assembler template_. Say for example you have 2 outputs and 2 inputs in your inline assembly like the given code below, you can access them in the assembler template using format % followed by the index of the operand, counting the outputs first and then the inputs
         ```c++
+        // uint32_t a, b, msb, lsb;  (32-bit, to match the 32-bit registers used below)
         asm volatile(
             "mov %2, %%eax\n\t"
-            "mul %3\n\t"
+            "mul %3\n\t"           // edx:eax = eax * %3
             "mov %%edx, %0\n\t"
             "mov %%eax, %1\n\t"
             : "=m"(msb), "=m"(lsb) // outputs %0, %1
             : "r"(a), "r"(b)       // inputs %2, %3
-            : "rax", "rdx"
+            : "rax", "rdx", "cc"   // "cc" because `mul` modifies the flags register
         );
         ```
     - **asmSymbolicName** instead of accessing inputs and outputs with zero base indexing you can also access them by using an asmSymbolicName, the format when creating an asm symbolic name in output and input parameter is this **```[asmSymbolicName]"constraint"(cvariablename)```**, then you can call the symbol in the assembler template using the format **```%[asmSymbolicName]```**
-    - **%%register_name** - format when use a specific register inside the assembler template, for example you want to move the value of you first input from the previous example above into the ```rdx``` register, you would do it like this
+    - **%%register_name** - format when using a specific register inside the assembler template (only needed in "extended" asm, i.e. when there are operands), for example if you want to move the value of your first input from the previous example above into the ```edx``` register, you would do it like this (note: the operand and register sizes must match, so for a 32-bit input use `%%edx`, for a 64-bit input use `%%rdx`)
         ```
-        "mov %2, %%rdx\n\t"
+        "mov %2, %%edx\n\t"
         ```
     - **‘%%’** - Outputs a single ‘%’ into the assembler code.
     - **‘%=’** - Outputs a number that is unique to each instance of the asm statement in the entire compilation. This option is useful when creating local labels and referring to them multiple times in a single template that generates multiple assembler instructions.
-        ```
-        ‘%{’
-        ‘%|’
-        ‘%}’
-        ```
-        Outputs ‘{’, ‘|’, and ‘}’ characters (respectively) into the assembler code. When unescaped, these characters have special meaning to indicate multiple assembler dialects, as described below.
+    - **‘%{’, ‘%|’, ‘%}’** - Outputs ‘{’, ‘|’, and ‘}’ characters (respectively) into the assembler code. When unescaped, these characters have special meaning to indicate multiple assembler dialects (e.g. `{AT&T version|Intel version}`).
 
 ## The register constraints ("r")
 
@@ -124,7 +120,7 @@ When the operands are in the memory, any operations performed on them will occur
 
 ## Constraint Modifiers.
 
-While using constraints, for more precise control over the effects of constraints, GCC provides us with constraint modifiers. Mostly used constraint modifiers are
+While using constraints, for more precise control over the effects of constraints, GCC provides us with constraint modifiers. The most commonly used constraint modifiers are
 
 - "+" : Both input and output operand, Operands using the ‘+’ constraint modifier count as two operands (that is, both as input and output) towards the total maximum of 30 operands per asm statement.
 - "=" : Means that this operand is write-only for this instruction; the previous value is discarded and replaced by output data.

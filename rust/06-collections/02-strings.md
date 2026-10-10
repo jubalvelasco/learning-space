@@ -10,7 +10,7 @@
 
     Provided by Rust's standard library rather than coded into the core language, this type is a growable UTF-8 encoded string type.
 
-# Creating New String
+# Creating a New String
 
 
 ```rust
@@ -21,7 +21,7 @@ Many of the same operations available with `Vec<T>` are available with `String` 
 
 # Create String from types with `Display` trait.
 
-Any types that **implements** the `Display` trait will always have an available `to_string()` method, **string literals** also implements that trait hence:
+Any type that **implements** the `Display` trait will always have an available `to_string()` method, **string literals** also implement that trait hence:
 
 ```rust
 let s = "initial contents".to_string();
@@ -71,7 +71,7 @@ let s1 = String::from("Hello, ");
 let s2 = String::from("world!");
 
 // note s1 has been moved here and can no longer be used
-// operator `+` is an 's1' method that returns itself (moved) to s3
+// operator `+` calls the `add` method on 's1', which takes ownership of s1, appends s2, and returns the result to s3
 let s3 = s1 + &s2;
 ```
 
@@ -81,7 +81,7 @@ The `+` operator uses the `add` method, whose signature looks something like thi
 fn add(self, s: &str) -> String {
 ```
 
-But wait—the type of `&s2` is `&String`, not `&str`, as specified in the second parameter to `add`. So why does it compiles?
+But wait—the type of `&s2` is `&String`, not `&str`, as specified in the second parameter to `add`. So why does it compile?
 
 The reason we’re able to use `&s2` in the call to `add` is that the compiler can coerce the `&String` argument into a `&str`. When we call the `add` method, **Rust uses a deref coercion**, which here turns `&s2` into `&s2[..]`. 
 
@@ -106,7 +106,7 @@ let s = format!("{s1}-{s2}-{s3}");
 
 # Indexing Into Strings
 
-It is not allowed to index `String` in rust, this is because unlike other languages like C and C++, rust uses `UTF-8` encoding (this encoding could use up to 1-4 bytes of data) instead of the `ASCII` (fixed one byte for characters) which can cause confusion to developers so rust doesn't allow it.
+It is not allowed to index `String` in rust, this is because rust strings are always `UTF-8` encoded, where one character can take 1 to 4 bytes. In C and C++, indexing a string simply returns a single byte (`char`), which for non-ASCII text may only be part of a character; this can cause confusion and bugs, so rust doesn't allow it.
 
 
 # Bytes and Scalar Values and Grapheme Clusters! Oh My!
@@ -133,7 +133,7 @@ Finally, if we look at them **as grapheme clusters**, we’d get what a person w
 ["न", "म", "स्", "ते"]
 ```
 
-It isn’t also possible to guarantee O(1) performance with a `String` indexing, because Rust would have to walk through the contents from the beginning to the index to determine how many valid characters there were.
+It also isn’t possible to guarantee O(1) performance with `String` indexing, because Rust would have to walk through the contents from the beginning to the index to determine how many valid characters there were.
 
 
 # Slicing Strings

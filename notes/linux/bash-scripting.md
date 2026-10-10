@@ -2,15 +2,15 @@
 
 ### Create Bash Scripts
 
-To create a bash script we add this comment to the very top
-of our bash script
+To create a bash script we add this line (called a **shebang**) to the very top
+of our bash script, it tells the system which interpreter should run the script
 
 ```bash
 #! /bin/bash
 ```
 
-> ![NOTE]  
-> All of this bash commands will also work in the terminal
+> [!NOTE]  
+> All of these bash commands will also work in the terminal
 > we don't necessarily need to create a bash script, most
 > of the time we only do this to avoid repetition of
 > multiple commands
@@ -19,7 +19,7 @@ of our bash script
 
 ```bash
 STRING="str"
-some_variable="noting to see here"
+some_variable="nothing to see here"   # no spaces around `=`
 ```
 
 ### Printing
@@ -52,7 +52,7 @@ arg1 arg2 arg3
 
 ### Reading Input
 
-You will be promted to enter a value for this variable
+You will be prompted to enter a value for this variable
 
 ```bash
 read just_a_variable
@@ -81,7 +81,7 @@ else
 fi
 ```
 
-Logical `&&`, `||`, `!` are also supported, Relational operations `==` and `!=` is also available and more.
+Logical `&&`, `||`, `!` are also supported, relational operators `==` and `!=` are also available and more.
 
 ```bash
 #! /bin/bash
@@ -113,7 +113,7 @@ if [[ $color == "red" ]]; then
     echo "wild"
 elif [[ $color == "blue" ]]; then
     echo "cool"
-elif [[ $green == "green" ]]; then
+elif [[ $color == "green" ]]; then
     echo "calm"
 else
     echo "not in the choice"
@@ -144,8 +144,8 @@ In Bash, there are several ways to evaluate conditions and perform tests. The pr
 2. `[ ]` (Single Square Brackets):
    - `[ ]`, also known as the test command, is a basic conditional construct.
    - It's less versatile compared to `[[ ]]` and should be used when only simple conditions are needed.
-   - It requires quoting variables and operators inside the brackets (e.g., `[ "$var" = "string" ]`).
-   - It uses single brackets (`[ ]`) and often requires a closing semicolon `;` after the condition.
+   - Variables should be quoted inside the brackets (e.g., `[ "$var" = "string" ]`), otherwise an empty or space-containing value breaks the test.
+   - Spaces are required after `[` and before `]` (since `[` is actually a command). Like with `[[ ]]`, a `;` (or a newline) is needed before `then` when it's on the same line.
 
     Example:
     ```bash
@@ -242,7 +242,7 @@ In Bash, there are several ways to evaluate conditions and perform tests. The pr
    - `(( ))` is used for arithmetic operations and comparisons.
    - It's primarily used for numeric comparisons, calculations, and incrementing/decrementing variables.
    - It doesn't require quoting variables.
-   - It evaluates to 0 for false and 1 for true.
+   - Its exit status is `0` (success/true) when the arithmetic expression is non-zero, and `1` (false) when the expression evaluates to `0`.
 
     Example:
     ```bash
@@ -261,7 +261,8 @@ In summary, `[[ ]]` is the most flexible and commonly used construct for conditi
 ### Pipe, Grep and Awk
 
 **Pipe** - the `|` character in bash is called a **pipe** where its job is to
-pass output of one command to the argument of another command.
+pass the output (stdout) of one command as the input (stdin) of another command
+(not as arguments; use `xargs` if you need to turn input into arguments).
 
 **grep** - is a useful command to search for matching patterns in a file. grep is short for "global regular expression print".
 
@@ -273,12 +274,12 @@ _**Show only the line that has a matching pattern**_
 lscpu | grep "Flags:"
 ```
 
-The example above filter the output of `lscpu` and only show the Flags line output. The way this work is by passing the original output of the `lscpu` command to arguments of grep then grep will find the `Flags:` pattern in a line and output the line if it has a match.
+The example above filters the output of `lscpu` and only shows the Flags line output. The way this works is by passing the original output of the `lscpu` command to the standard input of grep, then grep will find the `Flags:` pattern in a line and output the line if it has a match.
 
 _**Print a specific column number**_
 
 
-Column are just words in a output, by default they are separated by spaces.
+Columns are just words (fields) in the output, by default they are separated by whitespace (spaces or tabs).
 
 The command below will only print the first column of the lscpu command
 

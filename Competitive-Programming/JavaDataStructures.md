@@ -3,7 +3,7 @@
 
 - [Constants & Type Limits](#0-constants--type-limits)
 - [Primitive Arrays - (contiguous)](#1-raw--primitive-arrays)
-- [Dynamic Arrays - (non-contiguous)](#2-dynamic-arrays-arraylist)
+- [Dynamic Arrays - (contiguous references, scattered boxed elements)](#2-dynamic-arrays-arraylist)
 - [Binary Search On Sorted Asc Array](#25-binary-search-lower-bound-upper-bound-equal-range)
 - [Linked List](#3-linked-list)
 - [Stacks](#4-stack-arraydeque--preferred-over-legacy-stack)
@@ -19,7 +19,7 @@
 - [Min Heaps](#13-min-heap-priorityqueue)
 - [Max Heaps](#14-max-heap-priorityqueue-reversed)
 - [Min/Max Heaps With Pairs](#15-priorityqueue-with-pairs--custom-objects)
-- [Monotonic Dequeue](#16-monotonic-deque-sliding-window-maxmin)
+- [Monotonic Deque](#16-monotonic-deque-sliding-window-maxmin)
 - [Bitsets](#17-bitset)
 - [Big Integers](#18-biginteger)
 
@@ -106,8 +106,13 @@ int len  = a.length; // length field   - O(1)
 ```java
 int[] a = {3, 1, 4, 1, 5};
 
-Arrays.sort(a);              // sort asc in-place (dual-pivot quicksort) - O(n log n)
+Arrays.sort(a);              // sort asc in-place (dual-pivot quicksort) - O(n log n) average
 Arrays.sort(a, 1, 4);        // sort subarray [1, 4) in-place           - O(k log k), k = range size
+
+// PITFALL (CP): before JDK 14, dual-pivot quicksort on primitives has an O(n^2) worst case,
+// and some judges (e.g. Codeforces hacks) include "anti-quicksort" tests that trigger it.
+// Fix: shuffle the array randomly before sorting, or sort a boxed Integer[] / List
+// (objects are sorted with TimSort, which is always O(n log n)).
 
 // PITFALL: Arrays.sort on primitives has NO overload that accepts a Comparator.
 // You CANNOT do: Arrays.sort(a, Comparator.reverseOrder()); - compile error.
@@ -185,7 +190,8 @@ DO:
   - Use int[] / long[] for all fixed-size numeric data - no boxing overhead, cache-friendly.
   - Pre-allocate at maximum possible size (e.g. int[200_005]) rather than resizing.
   - Use a manual `size` variable to track the logical end if you need dynamic behavior.
-  - Use Arrays.sort(a) for ascending sort - it's fast (dual-pivot quicksort on primitives).
+  - Use Arrays.sort(a) for ascending sort - it's fast (dual-pivot quicksort on primitives),
+    but shuffle first if anti-quicksort tests are possible (older JDKs).
   - Use the reverse-in-place trick for descending sort instead of boxing.
   - Use flat 1D arrays (row * cols + col) for 2D grids in performance-critical code.
 
@@ -251,7 +257,7 @@ int[] a = {1, 3, 3, 5, 7, 9}; // must be sorted first
 
 int idx = Arrays.binarySearch(a, 5); // O(log n) - exact index, or -(insertionPoint+1) if absent
 // Same caveat as Collections.binarySearch: no guarantee which duplicate is returned.
-// Use the custom lowerBound / upperBound helpers from section 2 for precise control.
+// Use the custom lowerBound / upperBound helpers below for precise control.
 ```
 
 ### Binary Search On ArrayList
@@ -316,9 +322,10 @@ static int upperBound(long[] a, int n, long target) {
 ### Equal Range Binary Search - like `std::equal_range`
 
 ```java
-// Returns int[]{lo, hi} - the half-open range [lo, hi) where arr[i] == target.
+// Returns int[]{lo, hi} - the half-open range [lo, hi) where a[i] == target.
 // Range is empty (lo == hi) if target is not found.
-// Faster than calling lowerBound + upperBound independently:
+// Slightly faster than calling lowerBound + upperBound independently,
+// because the second search starts from the lower bound instead of 0:
 static int[] equalRange(long[] a, int n, long target) {
     int l = 0, r = n;
     while (l < r) {
@@ -492,9 +499,13 @@ int second = pair.second();  // read second component  - O(1)
 
 // --- Sort ---
 pairs.sort(Comparator.comparingInt(Pair::first));                                           // by first asc                - O(n log n)
-pairs.sort(Comparator.comparingInt(Pair::first).reversed());                                // by first desc               - O(n log n)
-pairs.sort(Comparator.comparingInt(Pair::first).thenComparingInt(Pair::second));            // by first asc, then sec asc  - O(n log n)
-pairs.sort(Comparator.comparingInt(Pair::first).thenComparingInt(Pair::second).reversed()); // both desc                   - O(n log n)
+
+// PITFALL: when chaining (.reversed(), .thenComparing...), Java can no longer infer the type
+// from a method reference like `Pair::first` on a generic record (compile error),
+// so give the lambda parameter an explicit type:
+pairs.sort(Comparator.comparingInt((Pair<Integer, Integer> p) -> p.first()).reversed());                                   // by first desc               - O(n log n)
+pairs.sort(Comparator.comparingInt((Pair<Integer, Integer> p) -> p.first()).thenComparingInt(p -> p.second()));            // by first asc, then sec asc  - O(n log n)
+pairs.sort(Comparator.comparingInt((Pair<Integer, Integer> p) -> p.first()).thenComparingInt(p -> p.second()).reversed()); // both desc                   - O(n log n)
 ```
 
 ---
@@ -597,8 +608,10 @@ PairC higher   = treeSet.higher(new PairC(1, 2)); // PairC(3, 4) - O(log n)
 > Override `equals()` + `hashCode()` manually for `HashMap`/`HashSet`.
 > Implement `Comparable` for `TreeMap`/`TreeSet`.
 >
-> **Pitfall**: if you implement `Comparable`, its ordering MUST be consistent with `equals()`:
-> `compareTo(o) == 0` ⟺ `equals(o) == true`. Violating this breaks `TreeMap`/`TreeSet`.
+> **Pitfall**: if you implement `Comparable`, its ordering should be consistent with `equals()`:
+> `compareTo(o) == 0` ⟺ `equals(o) == true`. `TreeMap`/`TreeSet` only use `compareTo` to decide
+> equality, so if they disagree, Tree containers and Hash containers will behave differently
+> (e.g. a `TreeSet` may reject an element that a `HashSet` would accept).
 
 ```java
 // --- Define once, outside your method ---
@@ -756,7 +769,7 @@ Arrays.sort(a, 0, 3);                       // sort subarray [0, 3)          - O
 // Reverse sort requires boxed Integer[], NOT int[]
 Integer[] b = {3, 1, 4};
 Arrays.sort(b, Comparator.reverseOrder());  // sort desc                     - O(n log n)
-Arrays.sort(b, (x, y) -> y - x);           // sort desc (same effect)       - O(n log n)
+Arrays.sort(b, (x, y) -> y - x);           // sort desc (same effect, but y - x can overflow for large values; prefer Integer.compare(y, x)) - O(n log n)
 
 // Copying
 int[] copy  = Arrays.copyOf(a, a.length);      // full copy                 - O(n)
@@ -820,8 +833,12 @@ freq.put("apple", freq.getOrDefault("apple", 0) + 1); // increment by 1         
 int c = freq.getOrDefault("apple", 0);                 // get count (0 if absent) - O(1) average
 
 // Decrement / remove
-freq.merge("apple", -1, Integer::sum);                 // decrement by 1          - O(1) average
+freq.merge("apple", -1, Integer::sum);                 // decrement by 1 (key stays with value 0) - O(1) average
 freq.remove("apple");                                   // remove key entirely     - O(1) average
+
+// Decrement and auto-remove the key when the count reaches 0
+// (merge removes the key if the remapping function returns null)
+freq.merge("apple", -1, (a, b) -> a + b == 0 ? null : a + b);   // O(1) average
 
 ```
 
@@ -1104,8 +1121,8 @@ BigInteger c = new BigInteger("deadbeef", 16);          // from hex string      
 // Arithmetic
 BigInteger sum  = a.add(b);             // addition                - O(n)
 BigInteger diff = b.subtract(a);        // subtraction             - O(n)
-BigInteger prod = a.multiply(b);        // multiplication          - O(n^1.585) Karatsuba
-BigInteger[] dr = b.divideAndRemainder(a);  // quotient + remainder- O(n^2) - dr[0]=quotient, dr[1]=remainder
+BigInteger prod = a.multiply(b);        // multiplication          - O(n^2) schoolbook for small numbers; Karatsuba O(n^1.585) / Toom-Cook 3 for very large ones
+BigInteger[] dr = b.divideAndRemainder(a);  // quotient + remainder- O(n^2) (Burnikel-Ziegler for very large) - dr[0]=quotient, dr[1]=remainder
 BigInteger mod  = b.mod(a);             // b % a (a must be > 0)  - O(n^2)
 BigInteger modPow = a.modPow(BigInteger.valueOf(7), BigInteger.valueOf(1000)); // a^7 % 1000 - O(log(exp) * n^2)
 
@@ -1121,8 +1138,8 @@ boolean    bit2 = a.testBit(2);        // read single bit          - O(1)
 BigInteger set5 = a.setBit(5);         // set bit 5               - O(n) (returns new object)
 
 // Conversion
-String decimal = b.toString();         // to decimal string        - O(n^2) (base conversion is expensive)
-String hex     = b.toString(16);       // to hex string            - O(n)   (word-by-word formatting)
+String decimal = b.toString();         // to decimal string        - O(n^2) (base conversion is expensive; JDK uses divide-and-conquer for very large numbers)
+String hex     = b.toString(16);       // to hex string            - also uses the general base-conversion algorithm (not a cheap O(n) path)
 byte[] bytes   = a.toByteArray();      // to byte array            - O(n)
 
 // Primality

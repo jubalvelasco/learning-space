@@ -17,7 +17,7 @@ enum IpAddrKind {
 }
 ```
 
-# Instantiating and Enum
+# Instantiating an Enum
 
 We can create instances of each of the two variants of `IpAddrKind` like this:
 
@@ -57,7 +57,7 @@ let home     = IpAddr::V4(String::from("127.0.0.1"));
 let loopback = IpAddr::V6(String::from("::1"));
 ```
 
-# Enums variants that holds different data types
+# Enum variants that hold different data types
 
 There’s another advantage to using an `enum` rather than a `struct`:
 
@@ -161,11 +161,11 @@ You want some other code to run only if you have a `None` value, and that code d
 
 The **match expression** is a control flow construct that does just this when used with `enums`: it will run different code depending on which **variant** of the `enum` it has, and that code can use the data inside the matching value.
 
-# Enums variants as public or private
+# Enum variants as public or private
 
 On the other hand, if we make an `enum` public in a module, all of its variants are then public. We only need the `pub` before the `enum` keyword.
 
-This is in contrast with `struct` where all of its members and methods are set to **private** by default if it comes from a module.
+This is in contrast with `struct` where all of its fields and methods are **private** by default (even when the struct itself is `pub`), and each one has to be marked `pub` individually.
 
 ```rust
 mod back_of_house {

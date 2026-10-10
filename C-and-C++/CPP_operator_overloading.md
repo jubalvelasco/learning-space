@@ -17,6 +17,11 @@ class HexString
 
     HexString(size_t n) : data(new unsigned char[n]), length(n) {}
 
+    // this class owns a raw pointer, so copying must be disabled (or implemented properly),
+    // otherwise two copies would delete the same memory (Rule of Three/Five)
+    HexString(const HexString&) = delete;
+    HexString& operator=(const HexString&) = delete;
+
     ~HexString()
     {
         delete [] data;
@@ -26,14 +31,20 @@ class HexString
 std::ostream& operator<<(std::ostream& outputStream, const HexString& instance)
 {
     for(size_t i=0; i<instance.length; ++i)
-            outputStream << static_cast<unsigned int>(instance.data[i]) << ' ';
-        return outputStream;
+        outputStream << static_cast<unsigned int>(instance.data[i]) << ' ';
+    return outputStream;
 }
 
 std::istream& operator>>(std::istream& inputStream, HexString& instance)
 {
+    // NOTE: reading directly into an `unsigned char` would read a single character,
+    // not a number, so read into an `unsigned int` (as hex) first and then narrow it
     for(size_t i=0; i<instance.length; ++i)
-        inputStream >> instance.data[i];
+    {
+        unsigned int value = 0;
+        inputStream >> std::hex >> value;
+        instance.data[i] = static_cast<unsigned char>(value);
+    }
     return inputStream;
 }
 

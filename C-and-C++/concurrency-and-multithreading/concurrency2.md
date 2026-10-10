@@ -4,7 +4,7 @@
 
 One process can have many threads.
 
-- static variables are initialize even in different threads.
+- static local variables are initialized only once, even if multiple threads reach their declaration at the same time (this initialization is thread-safe since C++11). Use `thread_local` if you want one variable per thread.
 - Each thread shares the same code, data, and kernel
 context.
     - run-time heap
@@ -61,8 +61,8 @@ for (size_t i = 0; i < threads.size(); ++i) {
 ## **C++20 jthreads**
 
 In C++20 `std::jthread` is introduced where it automatically
-calls `.join()` when the destructor is called, this happens
-if the running threads went out of scope.
+calls `.request_stop()` and then `.join()` when the destructor is called, this happens
+when the `jthread` object goes out of scope.
 
 ```c++
 std::vector<std::jthread> threads;
@@ -83,20 +83,35 @@ for (size_t i = 0; i < 10; ++i) {
 
 A way to signal an event between 2 or more threads.
 
-Condition variables allow us to in a sense take one thread 
-of the queue, until it is notified that it should start 
+Condition variables allow us to, in a sense, put a thread to sleep
+(waiting, without busy-looping), until it is notified that it should start 
 working.
 
 ```c++
 // 42:49 - Back to Basics - Mike Shah
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;
+
+std::thread worker([&]() {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [&]{ return ready; }); // sleeps until notified AND ready == true (handles spurious wakeups)
+    puts("worker: got the signal");
+});
+
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    ready = true;
+}
+cv.notify_one(); // wake up one waiting thread (notify_all() wakes all)
+worker.join();
 ```
 
-## **Barriers**
+## **Semaphores, Latches and Barriers (C++20)**
 
-Allow a fixed number of threads to enter a critical section.
-- `std::counting_semaphore`
-- `std::latch`
-- `std::barrier`
+- `std::counting_semaphore` - allows at most N threads to access a resource/critical section at the same time.
+- `std::latch` - a single-use countdown: threads wait until the counter reaches zero.
+- `std::barrier` - a reusable synchronization point: threads wait until a fixed number of threads have arrived, then all continue (and the barrier resets for the next phase).
 
 ## **Multiple threads using Asynchronous Programming**
 
@@ -109,7 +124,7 @@ We can start running a function simultaneously using `std::async`.
 auto foo = std::async(&function, arg1, arg2, ..., argN);
 ```
 
-And like `std::thread` we need to call `.get()` to synchronize the program.
+And like `std::thread`'s `.join()`, we call `.get()` on the returned `std::future` to wait for the result (synchronize).
 
 ```c++
 auto foo1 = std::async(&function, arg1, arg2, ..., argN);
@@ -121,7 +136,11 @@ auto foo2_result = foo2.get();
 Passing `std::launch::async` as the first argument when constructing
 `std::async` will force the program to create a new thread for that
 function, if you omit this the decision of whether to create a thread
-or not will depend on the underlying implementation.
+or not will depend on the underlying implementation (with `std::launch::deferred` the function
+runs lazily in the calling thread when `.get()`/`.wait()` is called).
+
+NOTE: the `std::future` returned by `std::async` blocks in its destructor until the task finishes,
+so if you don't store it (`std::async(...);`), the call effectively runs synchronously.
 
 ```c++
 auto foo = std::async(std::launch::async, &function, arg1, arg2, ..., argN);

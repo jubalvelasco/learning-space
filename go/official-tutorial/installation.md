@@ -4,8 +4,8 @@ Install the latest go version here https://go.dev/doc/install
 
 ```bash
 # Delete previous go installation then extract the downloaded go version
-rm -rf /usr/local/go
-tar -C /usr/local -xzf go<MAJOR>.<MINOR>.<PATCH>.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go<MAJOR>.<MINOR>.<PATCH>.linux-amd64.tar.gz
 
 # Add the go path installation to your environment variables
 echo 'export PATH="$PATH:/usr/local/go/bin"' >> ~/.bashrc
@@ -14,13 +14,16 @@ echo 'export PATH="$PATH:/usr/local/go/bin"' >> ~/.bashrc
 echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
 ```
 
-Then you might need to close the terminal then open it again to refresh the paths in the environment variables, if this does not work you might need to logout then login back to your computer or completely restart the computer for it to work.
+Then you might need to close the terminal then open it again (or run `source ~/.bashrc`) to refresh the paths in the environment variables, if this does not work you might need to logout then login back to your computer for it to work.
 
 ```bash
 # install latest go tool commands like :
-# tour - local served quick tutorial by examples
 # godoc - local served go module documentation
 go install golang.org/x/tools/cmd/...@latest
+
+# tour - local served quick tutorial by examples
+# (it is no longer part of golang.org/x/tools, it moved to golang.org/x/website)
+go install golang.org/x/website/tour@latest
 
 # go language server
 go install golang.org/x/tools/gopls@latest
@@ -49,6 +52,8 @@ http://127.0.0.1:6060/pkg/
 ```
 
 # Update Go Modules
+
+Update the dependencies of the module in the current directory:
 
 ```bash
 go get -u

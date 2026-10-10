@@ -24,7 +24,7 @@ The main aim of lifetimes is to prevent dangling references, which cause a progr
 
 The Rust compiler has a **borrow checker** that compares scopes to determine whether all borrows are valid. 
 
-Rust prevent compilation of programs that can produce dangling reference like the example below:
+Rust prevents compilation of programs that can produce dangling references like the example below:
 
 ```rust
 fn main() {
@@ -39,19 +39,19 @@ fn main() {
 }                         // ---------+
 ```
 
-Rust will throw a compilation error because `r` is recently pointing to `x`, but since `x` is inside a nested scope that get's destroyed before the `println!` macro call, rust can detect that the variable `r` at that point when used by the `println!` macro is already a dangling reference. 
+Rust will throw a compilation error because `r` is pointing to `x`, but since `x` is inside a nested scope that gets destroyed before the `println!` macro call, rust can detect that the variable `r` at that point when used by the `println!` macro is already a dangling reference. 
 
 # Generic Lifetimes in Functions
 
-In this function we can see that it take two parameters `x` and `y`, but `x` and `y` could have different lifetimes through out the program, for example;
+In the function below we can see that it takes two parameters `x` and `y`, but `x` and `y` could have different lifetimes throughout the program, for example;
 
-**Case 1 :** `y` could exist or is instantiated only inside the same local scope where the `longest` fuction is called, then `x` could exist or is instantiated outside of that same local scope, this would mean that `x` has a longer lifetime than `y`, if inside that local scope we assign the result to another variable `z` that is outside of that same local scope, but it returned the `y`, then that would also be a dangling reference.
+**Case 1 :** `y` could exist or is instantiated only inside the same local scope where the `longest` function is called, then `x` could exist or is instantiated outside of that same local scope, this would mean that `x` has a longer lifetime than `y`, if inside that local scope we assign the result to another variable `z` that is outside of that same local scope, but it returned the `y`, then that would also be a dangling reference.
 
-So Rust prevent the compilation of such function by default.
+So Rust prevents the compilation of such a function by default.
 
-**Case 2 :** But this will also prevent the compilation of such function even if we use it on **two variables** `x` and `y` that has the **same/valid lifetime**.
+**Case 2 :** But this will also prevent the compilation of such a function even if we use it on **two variables** `x` and `y` that have the **same/valid lifetime**.
 
-On such cases what we need to do is to annotate the lifetime of out parameters and return type in the function, this way we can prevent the first case described in this section, but allow the second one.
+In such cases what we need to do is to annotate the lifetimes of our parameters and return type in the function, this way we can prevent the first case described in this section, but allow the second one.
 
 ```rust
 fn longest(x: &str, y: &str) -> &str {
@@ -105,9 +105,9 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 }
 ```
 
-The function signature now tells Rust that for some lifetime `'a`, the function takes two parameters, both of which are string slices that live **at least** as long as the **least given lifetime** `'a` parameter.
+The function signature now tells Rust that for some lifetime `'a`, the function takes two parameters, both of which are string slices that live **at least** as long as lifetime `'a`. In practice, the concrete lifetime that gets substituted for `'a` is the **smaller (overlapping part)** of the lifetimes of `x` and `y`.
 
-The **returned reference** (the return type annotation) will be the smaller lifetime reference of the two parameters `x` and `y`.
+So the **returned reference** (the return type annotation) is only guaranteed to be valid for the smaller of the lifetimes of the two parameters `x` and `y`.
 
 # Lifetime Annotations in Struct Definitions
 
@@ -156,11 +156,11 @@ fn first_word<'a>(s: &'a str) -> &'a str {
 After writing a lot of Rust code, the Rust team found that Rust programmers were entering the same lifetime annotations over and over in particular situations. These situations were predictable and followed a few deterministic patterns. The developers programmed these patterns into the compiler’s code so the borrow checker could infer the lifetimes in these situations and wouldn’t need explicit annotations.
 
 
-_The patterns programmed into Rust’s analysis of references_ are called the **lifetime elision rules**. These aren’t rules for programmers to follow; they’re a set of particular cases that the compiler will consider, and **if your code fits these cases, you don’t need to write the lifetimes explicitly**.'
+_The patterns programmed into Rust’s analysis of references_ are called the **lifetime elision rules**. These aren’t rules for programmers to follow; they’re a set of particular cases that the compiler will consider, and **if your code fits these cases, you don’t need to write the lifetimes explicitly**.
 
 Lifetimes on function or method **parameters** are called **input lifetimes**, and lifetimes on **return** values are called **output lifetimes**.
 
-The compiler uses three rules to figure out the lifetimes of the references when there aren’t explicit annotations.**The first rule applies to input lifetimes**, and the **second and third** rules **apply to output lifetimes**.
+The compiler uses three rules to figure out the lifetimes of the references when there aren’t explicit annotations. **The first rule applies to input lifetimes**, and the **second and third** rules **apply to output lifetimes**.
 
 If the compiler gets to the end of the three rules and there are still references for which it can’t figure out lifetimes, the compiler will stop with an error. These rules apply to `fn` definitions as well as `impl` blocks.
 
@@ -191,7 +191,7 @@ If the compiler gets to the end of the three rules and there are still reference
     If there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters:
     
     ```rust
-    fn foo<'a>(x: &'a i32) -> &'a i32.
+    fn foo<'a>(x: &'a i32) -> &'a i32;
     ```
 
 ----
@@ -202,9 +202,27 @@ If the compiler gets to the end of the three rules and there are still reference
     
 ----
 
-In the example above the rules 1 and 2 is enough to determine the lifetime of the returned reference of the method `first_word`, so the rust compiler allows it's compilation even if there is no lifetime anotations.
+In the example above, rules 1 and 2 are enough to determine the lifetime of the returned reference of the function `first_word`, so the rust compiler allows its compilation even if there are no lifetime annotations.
 
-On the other hand only the rule 1 is applicable to the method `longest`, the rules 2 and 3 is not, the rust compiler will not be able to figure out the lifetime of the returned reference just by applying the rules so it will throw a compilation error for that method.
+On the other hand, only rule 1 is applicable to the function `longest` (it has two input lifetimes and no `self`), rules 2 and 3 are not, so the rust compiler will not be able to figure out the lifetime of the returned reference just by applying the rules and it will throw a compilation error for that function.
 
 # Lifetime Annotations in Method Definitions
+
+Lifetime names for struct fields always need to be declared after the `impl` keyword and then used after the struct’s name, because those lifetimes are part of the struct’s type.
+
+```rust
+impl<'a> ImportantExcerpt<'a> {
+    // rule 1 gives `&self` its own lifetime; no output reference, so nothing else is needed
+    fn level(&self) -> i32 {
+        3
+    }
+
+    // two input lifetimes (`&self` and `announcement`), but because one of them is `&self`,
+    // rule 3 gives the returned reference the lifetime of `&self`
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {announcement}");
+        self.part
+    }
+}
+```
 

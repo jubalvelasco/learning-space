@@ -1,25 +1,25 @@
 # Metaprogramming
 
-- **Program** - Something that inputs a data, transforms/process that said data to a process output data or information.
+- **Program** - Something that takes input data, and transforms/processes that data into output data or information.
 
-- **Metaprogram** - Something that transforms programs or code instead of data.
-    - If it looks at it's own structure it is a **reflection**, C++ meta prgramming with templates is a reflection.
+- **Metaprogram** - Something that treats programs or code (or types) as its data: it generates, transforms, or inspects code instead of (or in addition to) ordinary data.
+    - If a program looks at (and possibly modifies) its own structure it is called **reflection**. C++ template metaprogramming is **not** really reflection: it is compile-time computation over types and constants (the compiler "runs" the template code while compiling). Real static reflection is only being added in C++26.
 
 # Template Specialization
 
 - **Basic Template Declaration**
 
     ```c++
-    template<typename KEY, typname DATA>
+    template<typename KEY, typename DATA>
     struct Qmap {
         Qmap() { std::cout << "Qmap\n"; }
     };
     ```
 
-- **Partial Specialization** - not all template parameters are filled in but only some, it will works for all cases of the template where the first parameter is deduced to be an `int`.
+- **Partial Specialization** - not all template parameters are filled in but only some, it will work for all cases of the template where the first parameter is an `int`. (Only class templates and variable templates can be partially specialized, function templates cannot.)
 
     ```c++
-    template<typname DATA>
+    template<typename DATA>
     struct Qmap<int, DATA> {
         Qmap() { std::cout << "Qmap<int, DATA>\n"; }
     };
@@ -34,13 +34,13 @@
     };
     ```
 
-The compiler will check all of the different specialization, as well as the main template definition, and see which ones will work with these template parameters, the compiler will then choose which of the **candidate set** is more specific.
+The compiler will check all of the different specializations, as well as the main template definition, and see which ones will work with these template parameters, the compiler will then choose which of the **candidate set** is more specific.
 
 # Initializing with Template Classes - Template Argument Deduction
 
 - **Aggregate Initialization** - providing values inside `{}` that matches the member variables values and types of the class.
 
-- **Constructor Initialization** - construction of objects with `{}` is also possible by creatinh a constructor that will match the values and types inside the `{}` initialization values.
+- **Constructor Initialization** - construction of objects with `{}` is also possible by creating a constructor that will match the values and types inside the `{}` initialization values.
 
 ```c++
 int main() {
@@ -52,8 +52,8 @@ int main() {
     // more specific.
     auto B = Qmap<int, bool>();
 
-    // will choose the full partial Specialization of the double
-    // in template parameter since it is the most specific.
+    // will choose the full specialization `Qmap<int, int>`
+    // since it is the most specific.
     auto C = Qmap<int, int>();
 }
 ```
@@ -62,7 +62,7 @@ int main() {
 
 C++ provides predefined meta functions built in to the standard library.
 
-# Checking if Type is Pointer/Reference
+# Checking if Type is a Pointer
 
 To know more about template meta programming let us implement the `std::is_pointer<T>::value` of the standard library that checks if the given template parameter `T` type is a pointer type `T*` or not.
 
@@ -72,16 +72,19 @@ To know more about template meta programming let us implement the `std::is_point
 template<typename T>
 struct is_pointer {
     static constexpr bool value = false;
-}
+};
 
 // specializes if the given type is a pointer it will return true.
 template<typename T>
-struct is_pointer<*T> {
+struct is_pointer<T*> {
     static constexpr bool value = true;
-}
+};
+
+// NOTE: this simple version returns false for cv-qualified pointers like `int* const`,
+// the real `std::is_pointer` also handles those (it removes cv-qualifiers first).
 ```
 
-# Manipulating Types: Striping Pointer Types
+# Manipulating Types: Stripping Pointer Types
 
 Here is another example of how to get only the type `T` of a pointer `T*` using template specialization.
 
@@ -90,11 +93,13 @@ Here is another example of how to get only the type `T` of a pointer `T*` using 
 template<typename T>
 struct strip_pointer {
     using type = T;
-}
+};
 
 // returns only the type of a given pointer type.
 template <typename T>
 struct strip_pointer<T*> {
     using type = T;
-}
+};
+
+// the standard library version of this is `std::remove_pointer<T>::type`
 ```

@@ -8,6 +8,7 @@ https://www.boost.org/doc/libs/1_82_0/libs/predef/doc/index.html#_using_the_pred
 // clang only code goes here
 #elif defined(__GNUC__) || defined(__GNUG__)
 // gnu-gcc only code goes here
+// (clang also defines __GNUC__, that's why __clang__ must be checked first)
 #elif defined(_MSC_VER)
 // microsoft compiler only code goes here
 #endif
@@ -16,22 +17,25 @@ https://www.boost.org/doc/libs/1_82_0/libs/predef/doc/index.html#_using_the_pred
 ## assertion macro
 ```c++
 #include <iostream>
+#include <exception>
 
 #define ENABLE_ASSERT
 
+// the do { ... } while(0) wrapper makes the macro behave like a single statement,
+// so `if (x) M_ASSERT(y); else ...` works correctly
 #ifdef ENABLE_ASSERT
 #define M_ASSERT(expr) \
-      { \
+      do { \
          if(!(expr)){ \
             std::cerr << "ASSERTION FAILURE: \n"; \
             std::cerr << " => Condition: " << #expr << "\n"; \
-            std::cerr << " =>  Function: " << __FUNCTION__ << "\n"; \
+            std::cerr << " =>  Function: " << __func__ << "\n"; \
             std::cerr << __FILE__ << ":" << __LINE__ << ":" << "\n"; \
             std::terminate(); \
          } \
-      }
+      } while(0)
 #else
-#define M_ASSERT(expr)
+#define M_ASSERT(expr) do {} while(0)
 #endif
 ```
 
@@ -55,8 +59,11 @@ https://www.boost.org/doc/libs/1_82_0/libs/predef/doc/index.html#_using_the_pred
 
 ## Type assertion
 ```c++
-#define ASSERT_TYPE_EQUAL(type, expr) \
-   static_assert(std::is_same<type, expr>::value, "Expected type equality")
+#include <type_traits>
+
+// `expr_type` must be a type, e.g. ASSERT_TYPE_EQUAL(int, decltype(x));
+#define ASSERT_TYPE_EQUAL(type, expr_type) \
+   static_assert(std::is_same<type, expr_type>::value, "Expected type equality")
 ```
  
  ## Predefined Macros
@@ -65,11 +72,12 @@ https://www.boost.org/doc/libs/1_82_0/libs/predef/doc/index.html#_using_the_pred
 | --- | --- | --- |
 | ```__LINE__``` | Contains current line number of the program. | all |
 | ```__FILE__``` | Name of current file. | all |
-| ```__DATE__``` | Date in the format month/day/year | all |
-| ```__TIME__``` | Contains a string in the format hour:minute:second | all |
-| ```__cplusplus``` | Contains C++ standard Version string | all |
-| ```__FUNCTION__``` | Print name of current function or method (member function)	| all |
-| ```__PRETTY_FUNCTION__```	| Print name of current function or method with type signature.	| GGC/G++, Mingw(GCC for Windows) and Clang |
+| ```__DATE__``` | String with the compilation date in the format `"Mmm dd yyyy"` (e.g. `"Jan 14 2024"`) | all |
+| ```__TIME__``` | String with the compilation time in the format `"hh:mm:ss"` | all |
+| ```__cplusplus``` | Integer (`long`) constant of the C++ standard version | all |
+| ```__func__``` | Name of the current function (standard since C99/C++11, it's a variable, not a macro) | all |
+| ```__FUNCTION__``` | Name of the current function or method (member function), non-standard but supported by GCC, Clang and MSVC	| GCC, Clang, MSVC |
+| ```__PRETTY_FUNCTION__```	| Print name of current function or method with type signature.	| GCC/G++, MinGW (GCC for Windows) and Clang |
 | ```__FUNCSIG__``` | Print name of current function with type signature.	| MSVC(aka VC++) |
 
 **Possible values of ```__cplusplus``` macro**
@@ -78,7 +86,10 @@ https://www.boost.org/doc/libs/1_82_0/libs/predef/doc/index.html#_using_the_pred
 - 201103L	C++11
 - 201402L	C++14
 - 201703L	C++17
-- N/A	C++20
+- 202002L	C++20
+- 202302L	C++23
+
+NOTE: MSVC always reports `199711L` unless you compile with the `/Zc:__cplusplus` flag (use `_MSVC_LANG` instead).
 
 
 ## Macros for detecting platform or operating system
@@ -90,12 +101,12 @@ Windows 64 bits	| WinNT | ```_WIN64``` | Windows 64 bits. |
 Windows CE | WinCE | ```_WIN32_WCE``` | Windows CE Kernel for embedded systems. |
 | MSDOS | | ```MSDOS``` or ```__MSDOS__``` | |	 
 | OS2 | | ```OS2``` or ```_OS2``` or ```__OS2__``` | IBM's old OS2 Operating System. | 	 	 	 
-| Unix-like | Unix | ```__unix__``` | Check whether OS is unix-like (Linux, BSD-variant), Mac OSX) |
+| Unix-like | Unix | ```__unix__``` | Check whether OS is unix-like (Linux, BSD variants). NOTE: macOS does **not** define `__unix__`, check `__APPLE__` instead |
 | Linux | Unix | ```__linux__``` | Defined when compiling on Linux with Gcc or Clang |
-| Android | Unix | ```__ANDROID__``` | Android NDK. |
-| MacOSX and IOS (Darwin Kernel) | Unix | ```__apple__```, ```__APPLE__```, ```__MACH__```	| |
-| BSD | Unix | ```__bsd__``` | |
-| Free BDS | Unix | ```__FreeBSD__``` |	 
+| Android | Unix | ```__ANDROID__``` | Android NDK. (Android also defines `__linux__`) |
+| MacOSX and IOS (Darwin Kernel) | Unix | ```__APPLE__```, ```__MACH__```	| |
+| BSD | Unix | ```BSD``` (after `#include <sys/param.h>`) | |
+| Free BSD | Unix | ```__FreeBSD__``` | |
 | Net BSD | Unix | ```__NetBSD__``` | |	 
 | QNX | Unix | ```__QNX__``` | |	 
 | VxWorks | | ```__VXWORKS__``` or ```__vxworks``` | |	 
@@ -117,8 +128,8 @@ Windows CE | WinCE | ```_WIN32_WCE``` | Windows CE Kernel for embedded systems. 
 | **```_MSC_VER```** | Microsoft Visual Studio Compiler MSVC |
 | **```_MANAGED```** or **```__cplusplus_cli```** | Compilation to C++/CLI .NET (CLR) bytecode |
 | **```__INTEL_COMPILER```** |	Intel C/C++ Compiler |
-| **```__PGI```** | or __PGIC__	Portland Group C/C++ Compiler |
-| **```__BORLANDC__```** |	Borland C++ Compiler [DEPRECATED]
+| **```__PGI```** or **```__PGIC__```** | Portland Group C/C++ Compiler |
+| **```__BORLANDC__```** |	Borland C++ Compiler [DEPRECATED] |
 | **```__EMSCRIPTEN__```** | emscripten (asm.js - web assembly) |
 | **```__asmjs__```** |	asm.js |
 | **```__wasm__```** |	WebAssembly |
@@ -130,26 +141,27 @@ Windows CE | WinCE | ```_WIN32_WCE``` | Windows CE Kernel for embedded systems. 
 | Macros | Library |
 | --- | --- |
 | **```__GLIBCXX__```** |	Libstdc++ |
-| **```_LBCPP_VERSION```** | LibC++ |
-| **```_MSC_VER```** | MSVC C++ Library (Runtime) |
+| **```_LIBCPP_VERSION```** | LibC++ |
+| **```_MSVC_STL_VERSION```** (or **```_CPPLIB_VER```**) | MSVC C++ Standard Library (STL) |
 | **```__GLIBC__```** |	GNU LibC runtime |
 | **```__BIONIC__```** |	Bionic LibC runtime. (Android's C-library modified from BSD) |
 
 
-Macros for detecting architecture
+## Macros for detecting architecture
 
 | Architecture | Macro |
 | --- | --- |
 | ***Intel x86*** | |
 | x86 | **```_M_IX86```** ; ```__INTEL__``` ; **```__i386__```** |
 | ***Intel or AMD X86-64 (64 bits)*** | |
-| AMD64 (x86-64) | **```__amd__64__```** |
-| AMD64 | **```__amd_64```** |
+| AMD64 (x86-64) | **```__amd64__```** |
+| AMD64 | **```__amd64```** |
+| AMD64 (MSVC) | **```_M_X64```** ; **```_M_AMD64```** |
 | AMD64 | **```__x86_64__```** |
 | AMD64 | **```__x86_64```** |
 | Intel Itanium 64 bits | **```__IA64__```** , **```__ia64__```** |
 | ***ARM Core***	 | |
-| ARM (general) | **```__arm__```** , **```_ARM```**, **```_M_ARM```**, **```M_ARMT```** |
+| ARM (general) | **```__arm__```** , **```_ARM```**, **```_M_ARM```**, **```_M_ARMT```** |
 | ARM thumb extension | **```__thumb__```** |
 | ARM 2 CPU | **```__ARM_ARCH_2__```** |
 | ARM 3 CPU | **```__ARM_ARCH_3__```** |
@@ -160,9 +172,9 @@ Macros for detecting architecture
 | ARM 7 CPU | **```__ARM_ARCH_7__```** |
 | ARM 7 CPU | **```__ARM_ARCH_7A__```** |
 | ARM 7 CPU | **```__ARM_ARCH_7R__```** |
-| ARM 7 CPU | **```__ARM__ARCH_7M__```** |
+| ARM 7 CPU | **```__ARM_ARCH_7M__```** |
 | ARM 7 CPU | **```__ARM_ARCH_7S__```** |
-| ARM64 (ARM 64 bits ) | **```__aarch64__```** |
+| ARM64 (ARM 64 bits ) | **```__aarch64__```** ; **```_M_ARM64```** (MSVC) |
 | ***PowerPC*** | |	 
 | PowerPC core | **```__powerpc```** ; **```__powerpc__```** ; **```__POWERPC__```** ; **```_M_PPC```** |
 | PowerPC core | **```__powerpc64__```** |

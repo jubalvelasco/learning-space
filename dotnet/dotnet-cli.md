@@ -7,7 +7,7 @@ These are my notes for dotnet 6.
 ## **My release build**
 
 ```
-dotnet publish -p:PublishSingleFile=true -p:PublishTrimmed=true -r win-x64 --self-contained true -c release
+dotnet publish -p:PublishSingleFile=true -p:PublishTrimmed=true -r win-x64 --self-contained true -c Release
 ```
 
 ## **Create dotnet `gitignore`**
@@ -26,7 +26,7 @@ dotnet new sln
 
 ## **Create a project app with the `console` template**
 
-This will create a basic console C# application in the current directory.
+This will create a basic console C# application in a new `sampleApp` folder inside the current directory (`-o` sets the output folder; without it, the project is created directly in the current directory).
 
 ```
 dotnet new console -o sampleApp
@@ -34,15 +34,15 @@ dotnet new console -o sampleApp
 
 ## **Create a project library with the `classlib` template**
 
-This will create a library/module in the current directory.
+This will create a library/module in a new `sampleLib` folder inside the current directory.
 
 ```
-dotnet new console -o sampleLib
+dotnet new classlib -o sampleLib
 ```
 
 ## **Add projects to the solution file**
 
-This will add the projects to the current solution file in the directory, the folder project `sampleApp` and `sampleLib` should also exist in the same directory as the solution file.
+This will add the projects to the solution file in the current directory. The project folders `sampleApp` and `sampleLib` should also exist in the same directory as the solution file.
 
 ```
 dotnet sln add sampleApp sampleLib
@@ -85,8 +85,8 @@ dotnet clean
 
 ## **Publish, Bundle or Compile the application into release or debug builds**
 
-This will create a single debug build executable that can run on Windows x64 that has a dotnet6 runtime. (will not run on Windows that don't have the runtime)
+This will create a single-file executable that can run on Windows x64 machines that have the .NET 6 runtime installed (it will not run on machines that don't have the runtime). In .NET 6/7 `dotnet publish` builds the **Debug** configuration by default (since .NET 8 the default is **Release**); add `-c Release` or `-c Debug` to be explicit.
 
 ```
-dotnet publish -p:PublishSingleFile-true -r win-x64 --self-contained false
+dotnet publish -p:PublishSingleFile=true -r win-x64 --self-contained false
 ```

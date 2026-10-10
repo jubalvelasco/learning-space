@@ -2,7 +2,7 @@
 
 List of weird rust jargon, that I've never heard of in other programming language.
 
-- **arms** - block of code associated with the conditions in an if expressions.
+- **arms** - blocks of code associated with the conditions in `if` expressions, or with the patterns in `match` expressions.
 
 - **borrowing** - The action of creating a reference, can be achieved using the reference operator `&`.
 

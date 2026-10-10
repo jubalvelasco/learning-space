@@ -20,8 +20,8 @@ if x == 0 {
 
 **Notice** that in rust:
 
-- **Parenthesis** in if expressions are **not needed**.
-- **Primitive Type/POD Integers** are not a valid conditions for if-else expressions, unlike in other languages like C and C++ where `0` evaluates to `false`, In rust we should always be explicit.
+- **Parentheses** around the condition in if expressions are **not needed**.
+- The condition **must be a `bool`**, integers are not valid conditions for if-else expressions, unlike in other languages like C and C++ where `0` evaluates to `false`. In rust we should always be explicit.
     ```rust
     let number = 3;
 
@@ -34,7 +34,7 @@ if x == 0 {
 
 ### **`If` Scope Blocks are Expressions too**
 
-Since `if` blocks are considered as **Scope Blocks**, they are also valid expressions (returns a value), but if we are gonna do this, we need to make sure that all `if` **arm** expressions **returns** the **same type**.
+Since `if` blocks are considered as **Scope Blocks**, they are also valid expressions (they return a value), but if we are gonna do this, we need to make sure that all `if` **arm** expressions **return** the **same type** (and an `else` arm is required).
 
 **Example 1**
 ```rust
@@ -58,7 +58,7 @@ let cmp = if x > y {
 
 ### **`loop` expressions**
 
-The key word `loop {}` is equivalent to `while(true) {}` in other programming languages, it just repeats the code unless you explicitly tell it to stop with a `break` keyword.
+The keyword `loop {}` is equivalent to `while(true) {}` in other programming languages, it just repeats the code unless you explicitly tell it to stop with a `break` keyword.
 
 Though `while true {}` is valid in rust, the rust compiler will throw a warning to use `loop {}` instead.
 
@@ -78,7 +78,7 @@ Though `while true {}` is valid in rust, the rust compiler will throw a warning 
     };
     ```
 
-- **`continue`** - Not much difference in other programming languages, they just skip the remaining code below it, then proceeds to the next iteration of the loop.
+- **`continue`** - Not much different from other programming languages, it just skips the remaining code below it, then proceeds to the next iteration of the loop.
 
 ### **Loop Labels**
 
@@ -93,7 +93,7 @@ To **label a loop** we use the `'` single quote, name of the loop, and a `:` col
 'counting_down: while cnt >= 1 { /* code ... */ }
 ```
 
-To **break out of a labeled loop**, we use the `'` single quote, name of the loop, and a `;` semicolon.
+To **break out of a labeled loop**, we write `break` followed by the `'` single quote and the name of the loop, e.g. `break 'counting_up;` (`continue 'label;` also works).
 
 ```rust
 fn main() {
@@ -121,13 +121,13 @@ fn main() {
 
 ### **`while` statements**
 
-Yes in Rust, `while` loops are statements, unlike `loop` expressions, we **cannot return** a value using a `break` inside a `while` loop.
+Technically `while` loops are also expressions in Rust, but they always evaluate to `()` (the unit type), so unlike `loop` expressions, we **cannot return** a value using a `break` inside a `while` loop.
 
 In general while loops in Rust are mostly the same with other programming languages like C and C++ it will run as long as it satisfies the given condition, the only difference is we can label it.
 
 ### **`for` statements**
 
-Iterates a collection, also unlike using a `while` loop that adds runtime overhead because index bounds checking, it seems that `for` statements in rust doesn't need that.
+Iterates a collection. Unlike using a `while` loop with an index (which adds runtime overhead because of index bounds checking on every access), a `for` loop over a collection uses an iterator, so no bounds checks are needed.
 
 ```rust
 let arr = [10, 20, 40, 80, 160, 320];
@@ -139,15 +139,15 @@ println!();
 ```
 
 > [!WARNING]  
-> In some cases, when passing `collections` in a `for` loop statement like the `arr` in the example above (specially for types that does not implement the `Copy` trait), be reminded that it is a **move**, hence the collection will be unusable/invalid after passing it to the `for` loop statement, for example if we use a `Vec<i32>` this would be the case.
+> In some cases, when passing `collections` in a `for` loop statement like the `arr` in the example above (especially for types that do not implement the `Copy` trait), be reminded that it is a **move**, hence the collection will be unusable/invalid after passing it to the `for` loop statement, for example if we use a `Vec<i32>` this would be the case. Use `for element in &collection` (or `.iter()`) to borrow it instead.
 >
-> On the other hand, the example above uses type `[i32; 6]` array, so there is really is no problem here since `i32` implements the `Copy` trait.
+> On the other hand, the example above uses type `[i32; 6]` array, so there really is no problem here since `i32` implements the `Copy` trait (so the whole array is `Copy` and gets copied instead of moved).
 >
-> If instead we use a `[String; 6]` as an array type, the similar behavious as explained in the beginning of this warning will occur.
+> If instead we use a `[String; 6]` as an array type, the same behavior as explained in the beginning of this warning will occur.
 
 ### **`for` + `ranges`**
 
-You could also use ranges in `for` loop and maybe use it to index `collections` or compound types like the array above, **but this is not recommended because of the performance overhead added**.
+You could also use ranges in `for` loop and maybe use it to index `collections` or compound types like the array above, **but iterating the collection directly is preferred, since it is more idiomatic and indexing may add bounds-checking overhead** (the compiler can sometimes optimize the checks away).
 
 ```rust
 for num in 1..10 {

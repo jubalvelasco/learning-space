@@ -64,6 +64,8 @@ sudo ufw allow 2222
 
 # Step 4 — Enabling UFW
 
+**WARNING:** if you are connected to a remote server through SSH, make sure the SSH rule from Step 3 has been added **before** enabling the firewall, otherwise you will lock yourself out.
+
 Verify which rules were added so far, even when the firewall is still disabled
 
 ```bash
@@ -99,13 +101,15 @@ sudo ufw allow 80
 sudo ufw allow https
 # or
 sudo ufw allow 443
-```bash
+```
 
-### Allow Nginx & Apache with both HTTP and HTTPS,
+### Allow Nginx & Apache with both HTTP and HTTPS
+
+(these application profiles only exist after Apache/Nginx is installed, check with `sudo ufw app list`; use normal straight quotes, not curly ‘ ’ quotes)
 
 ```bash
-sudo ufw allow ‘Apache Full’
-sudo ufw allow ‘Nginx Full’
+sudo ufw allow 'Apache Full'
+sudo ufw allow 'Nginx Full'
 ```
 
 ### Specific Port Ranges
@@ -119,7 +123,7 @@ sudo ufw allow 6000:6007/udp
 
 ### Specific IP Addresses (intro to ufw `from` parameter)
 
-you can also specify IP addresses within your rules. For example,
+You can also specify IP addresses within your rules. For example,
 if you want to allow connections from a specific IP address,
 such as a work or home IP address of 203.0.113.4, you need to use
 the from parameter, providing then the IP address you want to allow:
@@ -129,8 +133,8 @@ sudo ufw allow from 203.0.113.4
 ```
 
 You can also specify a port that the IP address is allowed to connect
-to by adding to any port followed by the port number. For example,
-If you want to allow 203.0.113.4 to connect to port 22 (SSH):
+to by adding `to any port` followed by the port number. For example,
+if you want to allow 203.0.113.4 to connect to port 22 (SSH):
 
 ```bash
 sudo ufw allow from 203.0.113.4 to any port 22
@@ -146,6 +150,7 @@ the IP addresses ranging from 203.0.113.1 to 203.0.113.254:
 # the first 24 bits of the IP address (203.0.113) are fixed,
 # remember IPv4 is composed of 4 uint8/bytes, meaning using /24
 # is masking the ip with 255.255.255.0
+# (this actually covers 203.0.113.0 - 203.0.113.255)
 sudo ufw allow from 203.0.113.0/24
 ```
 
@@ -187,14 +192,14 @@ Output Example
 
 Let's assume `eth0` is a public network interface and `eth1` is a private network interface.
 
-you could allow HTTP traffic (port 80) to `eth0` public interface:
+You could allow HTTP traffic (port 80) on the `eth0` public interface:
 
 ```bash
 # allow your server to receive HTTP requests from the public internet
 sudo ufw allow in on eth0 to any port 80
 ```
 
-Or, if you want your most SQL database server (port 3306) to
+Or, if you want your MySQL database server (port 3306) to
 listen for connections on the `private` network interface `eth1`:
 
 ```bash
@@ -213,12 +218,14 @@ However, sometimes you will want to deny specific connections based on the sourc
 address or subnet, perhaps because you know that your server is being attacked from there. 
 
 ```bash
-For example, to deny HTTP connections
+# For example, to deny HTTP connections
 sudo ufw deny http
 
 # Or if you want to deny all connections from 203.0.113.4
 sudo ufw deny from 203.0.113.4
 ```
+
+**NOTE:** UFW checks the rules **in order** and the first matching rule wins, so a `deny` rule added after an `allow` rule that matches the same traffic has no effect. To make the deny rule take priority, insert it at the top: `sudo ufw insert 1 deny from 203.0.113.4`.
 
 ### Block `outgoing` connections `from` the `server`
 
@@ -261,7 +268,7 @@ The delete command works the same way for rules that were created referencing a 
 sudo ufw delete allow http
 
 # since service names are interchangeable with port numbers when specifying rules,
-you could also refer to the same rule as allow 80, instead of allow http:
+# you could also refer to the same rule as allow 80, instead of allow http:
 
 sudo ufw delete allow 80
 ```
@@ -277,16 +284,16 @@ sudo ufw status verbose
 
 # Step 9 — Disable or Reset Firewall
 
-If you decide you don’t want to use the UFW firewall, Any rules
-that you created with UFW will no longer be active. You can always
-run sudo ufw enable if you need to activate it later.
+If you decide you don’t want to use the UFW firewall, you can disable it,
+any rules that you created with UFW will no longer be active. You can always
+run `sudo ufw enable` if you need to activate it later.
 
 ```bash
 sudo ufw disable
 ```
 
 If you already have UFW rules configured but you decide that you
-want to start over, you can use the reset command:
+want to start over, you can use the reset command (it disables UFW and deletes all rules):
 
 ```bash
 sudo ufw reset

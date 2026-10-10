@@ -1,6 +1,6 @@
 # Starting and Stopping Services in Ubuntu
 
-### Check the status of all user services (`+` active, `-` inactive)
+### Check the status of all services (SysV init scripts) (`+` running, `-` not running, `?` unknown)
 
 ```bash
 service --status-all
@@ -8,20 +8,24 @@ service --status-all
 # show only the active ones
 service --status-all | grep '\[ + \]'
 
-# show onlt the inactive ones
+# show only the inactive ones
 service --status-all | grep '\[ - \]'
 ```
 
 or use this command to get all system services (shows more information and services)
 
 ```bash
+# by default this shows only the active (loaded) units
 systemctl list-units
 
-# show only the active ones
+# show all units, both active and inactive
 systemctl list-units -a
 
 # show only the inactive ones
 systemctl list-units -a --state=inactive
+
+# show only services
+systemctl list-units --type=service
 ```
 
 ### Check if a service is already running

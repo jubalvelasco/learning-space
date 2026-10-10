@@ -1,6 +1,6 @@
 ## Fastify
 
-A minimalist JavaScript web framework use to build fast web applications and APIs.
+A minimalist Node.js web framework used to build fast web applications and APIs.
 
 ### Installing Fastify
 ```cmd
@@ -57,4 +57,4 @@ start();
 
 ### Note :
 
-This things can change in the future, if these examples did not work, please see the official fastify documentation
+These things can change in the future, if these examples did not work, please see the official fastify documentation

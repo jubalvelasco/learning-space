@@ -10,8 +10,8 @@
 std::unique_ptr<myClass> myObj = std::make_unique<myClass>();
 ```
 
-- this smart pointer calls the delete automatically for a heap allocated object/array when the pointer goes out of scope
-- unique pointers cannot be copied to another unique_ptr or other smart pointers, but you can copy it on a raw pointer using the ```.get()``` method
+- this smart pointer automatically calls `delete` (or `delete[]` for arrays) on the heap allocated object/array when the pointer goes out of scope
+- unique pointers cannot be copied to another unique_ptr or other smart pointers (they can only be moved with `std::move`), but you can get a non-owning raw pointer to the object using the ```.get()``` method
 
 ```c++
 #include <iostream>
@@ -19,9 +19,9 @@ std::unique_ptr<myClass> myObj = std::make_unique<myClass>();
 
 int main()
 {
-    std::unique_ptr<int[]> arr1(new int[10]); // <- declaration, in some cases you might want to use the std::make_unique to be safer
-    std::unique_ptr<int[]> arr2 = arr1; // <- error
-    int* arr3 = arr1.get(); // <- allowed
+    std::unique_ptr<int[]> arr1(new int[10]); // <- declaration, you might prefer `std::make_unique<int[]>(10)` (C++14) to be safer
+    std::unique_ptr<int[]> arr2 = arr1; // <- compile error (copy is deleted), remove this line to compile the program
+    int* arr3 = arr1.get(); // <- allowed (arr3 does not own the memory, never delete it)
 
     for(size_t i=0; i<10; ++i)
         arr1[i] = i+1;
@@ -37,17 +37,18 @@ int main()
 
 ```
 
-if you compile this with ```-fsanitize=address``` even though we did not ```delete``` the allocated array, the program will not throw an error
+if you compile this with ```-fsanitize=address```, even though we did not ```delete``` the allocated array, no memory leak will be reported
 
 output: ```1 2 -2 4 5 6 7 8 9 10```
 
 ## shared_ptr
 
-- this smart pointer contains reference counts and only free or call delete if the reference count goes to zero
+- this smart pointer keeps a reference count and only calls delete (frees the object) when the reference count goes to zero
 
 ```c++
 #include <iostream>
 #include <memory>
+#include <string>
 
 class Subject
 {
@@ -59,14 +60,18 @@ class Subject
         {
             for(size_t i=0; i<10; ++i) arr[i] = i;
         }
-        ~Subject() { std::cout << "\tDestroyed = \n"; display(); }
+        ~Subject()
+        {
+            std::cout << "\tDestroyed = \n";
+            display();
+            delete [] arr; // free the array in the destructor only, NOT in display(), otherwise calling display() twice would double free
+        }
         void display()
         {
             std::cout << "\tsubject name : " << name << "\n"
                       << "\tcredits      : " << credits << "\n\t";
             for(size_t i=0; i<10; ++i) std::cout << arr[i] << " ";
             std::cout << "\n";
-            delete [] arr;
         }
 };
 
@@ -78,7 +83,7 @@ int main()
         std::shared_ptr<Subject> outside_ptr;
         {
             std::cout << "\t\tEnter inner scope 2 \n";
-            std::shared_ptr<Subject> math = std::make_shared<Subject>("Math Modern Wolrd",3);
+            std::shared_ptr<Subject> math = std::make_shared<Subject>("Math Modern World",3);
             
             outside_ptr = math;
 
@@ -100,8 +105,9 @@ Enter main scope
                 Exit inner scope 2 
         Exit inner scope 1 
         Destroyed = 
-        subject name : Math Modern Wolrd
+        subject name : Math Modern World
         credits      : 3
+        0 1 2 3 4 5 6 7 8 9 
 Exit main scope 
 ```
 
@@ -211,7 +217,7 @@ if (auto sp = w.lock()) {           // sp is shared_ptr<Foo>
 ## Things that are *not* in C++17 (or are deprecated/removed) — what to avoid
 
 * `std::auto_ptr` — **deprecated in C++11 and removed in C++17**. Don’t use it. It had confusing ownership semantics (copy transferred ownership) and was replaced by `unique_ptr`.
-* `std::observer_ptr` — proposal exists but **not part of standard C++17**. Use raw pointer or `weak_ptr`/`std::reference_wrapper` depending on intent.
+* `std::observer_ptr` — only exists as `std::experimental::observer_ptr` (Library Fundamentals TS v2), **not part of standard C++17**. Use raw pointer or `weak_ptr`/`std::reference_wrapper` depending on intent.
 
 ---
 
@@ -241,7 +247,7 @@ if (auto sp = w.lock()) {           // sp is shared_ptr<Foo>
 * `unique_ptr` — no reference-count overhead; fastest.
 * `shared_ptr` — extra memory and runtime cost for reference count; copying is heavier.
 * Control-block operations for `shared_ptr` are safe to call concurrently (atomic updates), but modifying the pointee still needs explicit synchronization.
-* If you need atomic load/store of `shared_ptr` across threads, use the **atomic helper functions** in `<memory>`: `std::atomic_load`, `std::atomic_store`, `std::atomic_compare_exchange_weak/strong`, etc. (Avoid assuming `std::atomic<std::shared_ptr<T>>` is portable/ideal for C++17.)
+* If you need atomic load/store of `shared_ptr` across threads, use the **atomic helper functions** in `<memory>`: `std::atomic_load`, `std::atomic_store`, `std::atomic_compare_exchange_weak/strong`, etc. (`std::atomic<std::shared_ptr<T>>` only exists since C++20, which also deprecates these helper functions.)
 
 ---
 

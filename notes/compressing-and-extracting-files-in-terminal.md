@@ -18,7 +18,7 @@ unzip zip-file.zip -d ./
 zip zipped-file-name-output.zip file1 file2 ... fileN
 ```
 
-### 7z Compression (I used this in my `Window` specific projects)
+### 7z Compression (I used this in my `Windows` specific projects)
 
 ```bash
 7z a -tzip zipped-file-name-output.zip file1 file2 ... fileN
@@ -30,7 +30,7 @@ zip zipped-file-name-output.zip file1 file2 ... fileN
 zip -r zipped-directory-name-output.zip directory-to-zip
 ```
 
-### 7z Directory Compression (I used this in my `Window` specific projects)
+### 7z Directory Compression (I used this in my `Windows` specific projects)
 
 ```bash
 7z a -tzip zipped-directory-name-output.zip directory-to-zip

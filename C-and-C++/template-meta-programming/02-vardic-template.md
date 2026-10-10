@@ -27,9 +27,9 @@ T sum(T arg, TRest... args) {
 }
 ```
 
-# Vardic Templates - Arbitrary Template & Function Parameter
+# Variadic Templates - Arbitrary Template & Function Parameter
 
-Since we don't have for loops with variadic templates, we use recursion when iterating it.
+Since we can't use a normal for loop over a parameter pack, we use recursion when iterating it (or, since C++17, a fold expression like the ones above).
 
 ```c++
 // handle empty arguments
@@ -55,9 +55,9 @@ void println(T0 arg, TRest... args) {
 }
 ```
 
-- `typename ... TRest` - indicates that there could be an arbitrary numbers of type names.
+- `typename ... TRest` - indicates that there could be an arbitrary number of type names (a template parameter pack).
 
-- `TRest.. args`       - "parameter pack" expands the given arbitrary types.
+- `TRest... args`      - a function parameter pack, one function parameter for each of the given types.
 
 - `println(args...);`  - expand the `args` "parameter pack" values when passed to the `println` function recursively.
 
@@ -71,19 +71,19 @@ int main() {
 
 # Printing `tuple` types using our `println`  function
 
-**Tag Dispatch** - Here even though the function parameter **`std::index_sequence<indices...>`** is not named and used, the only reason why its here is for the compiler to know which overload to pick.
+Here even though the function parameter **`std::index_sequence<indices...>`** is not named or used, the only reason why it's here is so the compiler can **deduce** the `indices...` pack (`0, 1, ..., N-1`) from its type.
 
-The principle of taking a parameter just for the type and not for its data is called "Tag Dispatch"
+Taking a parameter just for its type and not for its data is similar to **"Tag Dispatch"** (strictly, tag dispatch means using such a parameter to select between overloads, while here it is used to deduce a parameter pack).
 
 ```c++
 template<typename tuple_t, size_t ... indices>
 void print_tuple_impl(tuple_t tuple_arg, std::index_sequence<indices...>) { 
     println(std::get<indices>(tuple_arg)...);
-    // expands the `indices` to
+    // expands the `indices` into a single call:
     // println(std::get<0>(tuple_arg),
-    // println(std::get<1>(tuple_arg),
-    // ...
-    // println(std::get<N>(tuple_arg),
+    //         std::get<1>(tuple_arg),
+    //         ...
+    //         std::get<N-1>(tuple_arg));
 }
 
 template <typename tuple_t>
@@ -91,7 +91,7 @@ void print_tuple(tuple_t tuple_arg) {
     // used tag dispatch
     print_tuple_impl(
         tuple_arg,
-        // creates a `std::integer_sequence`
+        // creates a `std::index_sequence<0, 1, ..., N-1>` (a `std::integer_sequence` of `size_t`)
         std::make_index_sequence<
             // returns the size of the tuple type
             std::tuple_size<tuple_t>::value
@@ -108,8 +108,7 @@ Then we can print our tuple using the new template function.
 ```c++
 int main() {
     // Creates a tuple object, deducing the target type from
-    // the types of arguments (see move semantics perfect
-    // forwarding for more info).
+    // the (decayed) types of the arguments, here std::tuple<const char*, const char*, int, bool>.
     auto myTuple = std::make_tuple("hello", "there", 99, true);
 
     print_tuple(myTuple);

@@ -1,4 +1,4 @@
-The `\require{cancel}` might be needed in some Math Renderer to enable cancle symbols.
+The `\require{cancel}` might be needed in some Math Renderers to enable cancel symbols.
 
 $$
 \begin{align}

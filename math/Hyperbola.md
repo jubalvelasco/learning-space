@@ -8,8 +8,8 @@ When the equation is in standard form:
 | | |
 | --- | --- |
 | $a$ | distance from the center to a vertex |
-| $2a$ | length of the transverse axis, this is where the hyperbola lies |
-| $\pm \dfrac{b^2}{a}$ | y(horizontal) or x(vertical) coordinate of the latus rectum |
+| $2a$ | length of the transverse axis, the segment between the two vertices (the foci also lie on this axis) |
+| $\pm \dfrac{b^2}{a}$ | offset from $k$ (horizontal) or from $h$ (vertical) of the latus rectum endpoints, e.g. $(h \pm c, k \pm \frac{b^2}{a})$ for a horizontal hyperbola |
 | $\dfrac{2b^2}{a}$ | length of the latus rectum |
 | $c^2 = a^2 + b^2$ | for the focus |
 
@@ -38,7 +38,7 @@ When the equation is in standard form:
     | --- | --- |
     | $C(h, k)$ | Center |
     | $F(h \pm c, k)$ | Foci |
-    | $V(h \pm a, k)$ | Verticies |
+    | $V(h \pm a, k)$ | Vertices |
     <!-- | $mV(h, k \pm b)$ | Minor Verticies | -->
 
 - **Vertical Hyperbola Coordinates**
@@ -46,5 +46,5 @@ When the equation is in standard form:
     | --- | --- |
     | $C(h, k)$ | Center |
     | $F(h, k \pm c)$ | Foci |
-    | $V(h, k \pm a)$ | Verticies |
+    | $V(h, k \pm a)$ | Vertices |
     <!-- | $mV(h \pm b, k)$ | Minor Verticies | -->

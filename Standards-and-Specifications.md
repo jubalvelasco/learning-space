@@ -16,4 +16,4 @@
 
 ## **Audio**
 
-- [RFC 5219 - mp3](https://www.rfc-editor.org/info/rfc5219)
+- [RFC 5219 - RTP Payload Format for MP3](https://www.rfc-editor.org/info/rfc5219) (note: this RFC only covers streaming MP3 over RTP; the MP3 format itself is defined in ISO/IEC 11172-3 and ISO/IEC 13818-3)
