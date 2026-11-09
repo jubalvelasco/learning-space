@@ -297,6 +297,54 @@ dependencies {
 }
 ```
 
+### Using SLF4J with Logback
+
+**SLF4J** is a logging API: your application calls its methods, such as `info()` and `error()`. **Logback** is a logging backend: it receives those calls and writes or routes the log events, for example to the console or a file. SLF4J lets application code use a consistent API without depending directly on a particular backend.
+
+Add both entries to `gradle/libs.versions.toml`:
+
+```toml
+[versions]
+slf4j = "2.0.17"
+logback = "1.5.18"
+
+[libraries]
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+```
+
+Add the dependencies to the module that runs the application, such as `app/build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation(libs.slf4j.api)
+    runtimeOnly(libs.logback.classic)
+}
+```
+
+Why use different Gradle configurations?
+
+- **`implementation(libs.slf4j.api)`** makes SLF4J available at compile time and runtime. Java source code imports SLF4J types such as `Logger` and `LoggerFactory`, so the API is required to compile.
+- **`runtimeOnly(libs.logback.classic)`** makes Logback available when the application runs, but not when source code is compiled. The application uses SLF4J's API and does not need to import Logback classes. Logback Classic also brings in its `logback-core` dependency.
+
+Use SLF4J in a Java class like this:
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class App {
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+
+    public static void main(String[] args) {
+        LOGGER.info("Application starting");
+        LOGGER.info("Processed {} messages", 10);
+    }
+}
+```
+
+Use `{}` placeholders for values instead of concatenating strings. If SLF4J is present but no logging backend is on the runtime classpath, SLF4J cannot write the log events; include a backend such as Logback in the application runtime.
+
 ### Option B: constraints in the conventions file
 
 The generated project also shows a second way to share versions. The common conventions file declares a version once as a **constraint**:
